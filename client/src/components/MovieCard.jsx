@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Star, Ticket, Info, Bell, Film, Clock } from 'lucide-react';
 
 const MovieCard = ({ movie, isComingSoon = false }) => {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className="movie-card flex-shrink-0 w-40 sm:w-44 md:w-48 cursor-pointer group">
+    <Link to={`/movie/${movie.id}`} className="movie-card flex-shrink-0 w-40 sm:w-44 md:w-48 cursor-pointer group block">
 
       {/* ── Poster ────────────────────────────────── */}
       <div className="relative rounded-xl overflow-hidden bg-[#1e1e1e] aspect-[2/3] mb-3 shadow-lg">
@@ -100,7 +101,7 @@ const MovieCard = ({ movie, isComingSoon = false }) => {
           <p className="text-[#E50914] text-xs font-semibold mt-1">Nu. {movie.price?.regular}+</p>
         )}
       </div>
-    </div>
+    </Link>
   );
 };
 

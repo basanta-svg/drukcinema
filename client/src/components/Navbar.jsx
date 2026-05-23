@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, Menu, X, LogOut, User, Ticket } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
   { label: 'Home',    to: '/' },
@@ -13,7 +14,10 @@ const navLinks = [
 const Navbar = () => {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
+  const [userMenu,  setUserMenu]  = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -21,8 +25,10 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // close mobile menu on route change
-  useEffect(() => setMenuOpen(false), [location]);
+  // close menus on route change
+  useEffect(() => { setMenuOpen(false); setUserMenu(false); }, [location]);
+
+  const handleLogout = () => { logout(); navigate('/'); };
 
   return (
     <nav
@@ -68,26 +74,54 @@ const Navbar = () => {
 
           {/* ── Right actions ─────────────────────────── */}
           <div className="flex items-center gap-2">
-            {/* Search — desktop only */}
+            {/* Search */}
             <button className="hidden sm:flex p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/8 transition-colors">
               <Search size={18} />
             </button>
 
-            {/* Sign In */}
-            <Link
-              to="/login"
-              className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-semibold text-white border border-white/25 rounded-lg hover:border-white/60 hover:bg-white/8 transition-all"
-            >
-              Sign In
-            </Link>
-
-            {/* Register */}
-            <Link
-              to="/register"
-              className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#E50914] rounded-lg hover:bg-[#c8000f] transition-all"
-            >
-              Register
-            </Link>
+            {isAuthenticated && user ? (
+              /* Logged-in user menu */
+              <div className="hidden sm:block relative">
+                <button
+                  onClick={() => setUserMenu(v => !v)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/8 transition-colors"
+                >
+                  <div className="w-7 h-7 bg-[#E50914] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {user.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <span className="text-white text-sm font-medium max-w-[100px] truncate">{user.name}</span>
+                </button>
+                {userMenu && (
+                  <div className="absolute right-0 mt-1 w-48 bg-[#1e1e1e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-white/8">
+                      <p className="text-white text-sm font-semibold truncate">{user.name}</p>
+                      <p className="text-gray-500 text-xs truncate">{user.email}</p>
+                    </div>
+                    <Link to="/profile" className="flex items-center gap-2 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-white/6 text-sm transition-colors">
+                      <User size={14} /> My Profile
+                    </Link>
+                    <Link to="/my-bookings" className="flex items-center gap-2 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-white/6 text-sm transition-colors">
+                      <Ticket size={14} /> My Bookings
+                    </Link>
+                    <div className="border-t border-white/8">
+                      <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-950/30 text-sm transition-colors">
+                        <LogOut size={14} /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Guest buttons */
+              <>
+                <Link to="/login" className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-semibold text-white border border-white/25 rounded-lg hover:border-white/60 hover:bg-white/8 transition-all">
+                  Sign In
+                </Link>
+                <Link to="/register" className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#E50914] rounded-lg hover:bg-[#c8000f] transition-all">
+                  Register
+                </Link>
+              </>
+            )}
 
             {/* Mobile hamburger */}
             <button
