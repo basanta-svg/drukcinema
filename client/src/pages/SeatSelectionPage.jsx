@@ -1,316 +1,283 @@
 import { useState, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, Ticket, Trash2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import api from '../api/client';
+import { ChevronLeft, Ticket, X, AlertCircle, Info } from 'lucide-react';
 
-/* ── Seat layout builder ──────────────────────────── */
-const SECTIONS = [
-  { id: 'regular', label: 'Regular', rows: ['A','B','C','D'],           seatsPerRow: 10, price: null }, // price from movie
-  { id: 'deluxe',  label: 'Deluxe',  rows: ['E','F','G','H'],           seatsPerRow: 12, price: null },
-  { id: 'vip',     label: 'VIP',     rows: ['I','J'],                   seatsPerRow: 14, price: null },
+/* ── Seat layout config ───────────────────────────── */
+const LAYOUT = [
+  { id: 'regular', label: 'Regular', rows: ['A','B','C','D'],  seats: 10, price: null, color: 'zinc' },
+  { id: 'deluxe',  label: 'Deluxe',  rows: ['E','F','G','H'],  seats: 12, price: null, color: 'blue' },
+  { id: 'vip',     label: 'VIP',     rows: ['I','J'],          seats: 14, price: null, color: 'amber' },
 ];
 
-const buildSeats = (movieId, showtimeId, prices) => {
+/* Deterministic occupied seats */
+const buildLayout = (movieId, showtimeId, prices) => {
+  const seed    = (movieId * 31 + String(showtimeId).charCodeAt(0) * 17) || 42;
+  const rowList = 'ABCDEFGHIJ';
   const occupied = new Set();
-  // Deterministic "occupied" seats based on movie+showtime seed
-  const seed = (movieId * 31 + String(showtimeId).charCodeAt(0) * 17) || 42;
-  for (let i = 0; i < 35; i++) {
-    const rowLetters = 'ABCDEFGHIJ';
-    const r = rowLetters[(seed * (i + 3) * 7) % rowLetters.length];
+  for (let i = 0; i < 38; i++) {
+    const r = rowList[(seed * (i + 3) * 7) % rowList.length];
     const s = ((seed * (i + 1) * 13) % 14) + 1;
     occupied.add(`${r}${s}`);
   }
-
-  return SECTIONS.map(section => ({
-    ...section,
-    price: section.id === 'regular' ? prices.regular
-         : section.id === 'deluxe'  ? Math.round(prices.regular * 1.3)
+  return LAYOUT.map(s => ({
+    ...s,
+    price: s.id === 'regular' ? prices.regular
+         : s.id === 'deluxe'  ? Math.round(prices.regular * 1.3)
          : prices.vip,
-    rows: section.rows.map(row => ({
+    rows: s.rows.map(row => ({
       row,
-      seats: Array.from({ length: section.seatsPerRow }, (_, i) => {
-        const num  = i + 1;
-        const seatId = `${row}${num}`;
-        return { id: seatId, row, num, type: section.id, occupied: occupied.has(seatId) };
+      seats: Array.from({ length: s.seats }, (_, i) => {
+        const num = i + 1;
+        return { id: `${row}${num}`, row, num, type: s.id, occupied: occupied.has(`${row}${num}`) };
       }),
     })),
   }));
 };
 
-/* ── Seat button ──────────────────────────────────── */
-const SeatBtn = ({ seat, selected, onToggle }) => {
-  if (seat.occupied) {
-    return <div className="w-7 h-7 rounded-t-md bg-white/10 border border-white/6 cursor-not-allowed flex-shrink-0" title="Booked" />;
-  }
-  const colors = {
-    regular: selected ? 'bg-[#E50914] border-[#E50914]' : 'bg-zinc-700 border-zinc-600 hover:bg-zinc-500 hover:border-zinc-400',
-    deluxe:  selected ? 'bg-[#E50914] border-[#E50914]' : 'bg-blue-900/60 border-blue-700/50 hover:bg-blue-800/60',
-    vip:     selected ? 'bg-[#E50914] border-[#E50914]' : 'bg-amber-900/60 border-amber-700/50 hover:bg-amber-700/60',
-  };
-  return (
-    <button
-      onClick={() => onToggle(seat)}
-      className={`w-7 h-7 rounded-t-md border text-[9px] font-bold text-white transition-all duration-150 flex-shrink-0 ${colors[seat.type]}`}
-      title={`Seat ${seat.id}`}
-    >
-      {seat.num}
-    </button>
-  );
+/* Seat colors by type + state */
+const seatCls = (type, selected, occupied) => {
+  if (occupied) return 'bg-white/6 border-white/5 cursor-not-allowed opacity-40';
+  if (selected) return 'bg-[#E50914] border-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.5)] scale-110';
+  const base = { regular: 'bg-zinc-800 border-zinc-700 hover:bg-zinc-600 hover:border-zinc-500',
+                  deluxe:  'bg-blue-950/70 border-blue-800/50 hover:bg-blue-800/70',
+                  vip:     'bg-amber-950/70 border-amber-800/50 hover:bg-amber-700/70' };
+  return base[type] || base.regular;
 };
 
-/* ── Page ─────────────────────────────────────────── */
 const SeatSelectionPage = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  const { movie, showtime } = location.state || {};
+  const { state }  = useLocation();
+  const navigate   = useNavigate();
+  const { movie, showtime } = state || {};
 
   const [selected, setSelected] = useState([]);
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState('');
 
-  const layout = useMemo(() => {
-    if (!movie) return [];
-    return buildSeats(movie.id, showtime?.id || '0', movie.price || { regular: 150, vip: 300 });
-  }, [movie, showtime]);
+  const prices = { regular: movie?.price?.regular || 150, vip: movie?.price?.vip || 300 };
+  const layout  = useMemo(() => movie ? buildLayout(movie.id, showtime?.id || '0', prices) : [], [movie]);
 
-  if (!movie || !showtime) {
-    return (
-      <div className="min-h-screen bg-[#141414] flex items-center justify-center pt-20 text-center px-4">
-        <div>
-          <AlertCircle size={40} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-white text-xl font-bold mb-2">No showtime selected</h2>
-          <p className="text-gray-500 mb-4">Please go back and select a showtime first.</p>
-          <Link to="/movies" className="px-5 py-2.5 bg-[#E50914] text-white rounded-lg text-sm font-semibold hover:bg-[#c8000f] transition-colors">
-            Browse Movies
-          </Link>
-        </div>
+  if (!movie || !showtime) return (
+    <div className="min-h-screen bg-[#141414] flex items-center justify-center pt-20 text-center px-4">
+      <div>
+        <AlertCircle size={40} className="text-red-500 mx-auto mb-4" />
+        <h2 className="text-white text-xl font-bold mb-2">No showtime selected</h2>
+        <Link to="/movies" className="px-5 py-2.5 bg-[#E50914] text-white rounded-xl text-sm font-semibold hover:bg-[#c8000f] transition-colors">
+          Browse Movies
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
 
-  const toggle = (seat) => {
+  const toggle = seat => {
+    if (seat.occupied) return;
     setSelected(prev => {
       const exists = prev.find(s => s.id === seat.id);
       if (exists) return prev.filter(s => s.id !== seat.id);
-      if (prev.length >= 8) return prev; // max 8 seats
+      if (prev.length >= 8) return prev;
       return [...prev, seat];
     });
   };
 
-  const totalPrice = selected.reduce((sum, seat) => {
-    const section = layout.find(s => s.id === seat.type);
-    return sum + (section?.price || 150);
+  const total = selected.reduce((sum, s) => {
+    const sec = layout.find(l => l.id === s.type);
+    return sum + (sec?.price || 150);
   }, 0);
 
-  const handleConfirm = async () => {
-    if (!isAuthenticated) { navigate('/login', { state: { from: location } }); return; }
-    if (selected.length === 0) { setError('Please select at least one seat.'); return; }
-    setLoading(true);
-    setError('');
-    try {
-      const { data } = await api.post('/bookings', {
-        movieId: String(movie.id),
-        showtime: {
-          date: showtime.date,
-          time: showtime.time,
-          hall: showtime.hall,
-          cinema: showtime.hall,
-        },
-        seats: selected.map(s => ({ row: s.row, number: s.num, type: s.type })),
-        paymentMethod: 'cash',
-      });
-      navigate('/booking/success', {
-        state: { booking: data.booking, movie, showtime, seats: selected, total: totalPrice }
-      });
-    } catch (err) {
-      // Even if backend unreachable, show local success for demo
-      const fakeRef = 'DC' + Date.now().toString(36).toUpperCase();
-      navigate('/booking/success', {
-        state: {
-          booking: { bookingRef: fakeRef, status: 'confirmed' },
-          movie, showtime, seats: selected, total: totalPrice,
-        }
-      });
-    } finally {
-      setLoading(false);
-    }
+  const confirm = () => {
+    if (!selected.length) return;
+    const fakeRef = 'DC' + Date.now().toString(36).toUpperCase();
+    navigate('/booking/success', {
+      state: { booking: { bookingRef: fakeRef, status: 'confirmed' }, movie, showtime, seats: selected, total }
+    });
   };
 
+  const sectionColor = id => id === 'vip' ? 'text-amber-400' : id === 'deluxe' ? 'text-blue-400' : 'text-gray-500';
+
   return (
-    <div className="min-h-screen bg-[#141414] pt-20 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#141414] pt-16">
 
-        {/* Header */}
-        <div className="flex items-center gap-3 py-6 border-b border-white/6 mb-8">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
-            <ChevronLeft size={18} />
+      {/* ── Header bar ──────────────────────────────── */}
+      <div className="bg-[#111] border-b border-white/5 sticky top-16 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-4">
+          <button onClick={() => navigate(-1)}
+            className="p-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-gray-400 hover:text-white transition-colors flex-shrink-0">
+            <ChevronLeft size={17} />
           </button>
-          <div>
-            <h1 className="text-white font-bold">{movie.title}</h1>
-            <p className="text-gray-500 text-sm">{showtime.day} · {showtime.time} · {showtime.hall}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-white font-bold text-sm truncate">{movie.title}</p>
+            <p className="text-gray-600 text-xs">{showtime.day} · {showtime.time} · {showtime.hall}</p>
           </div>
+          {selected.length > 0 && (
+            <div className="flex-shrink-0 text-right">
+              <p className="text-white font-black text-sm">Nu. {total}</p>
+              <p className="text-gray-600 text-xs">{selected.length} seat{selected.length>1?'s':''}</p>
+            </div>
+          )}
         </div>
+      </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col xl:flex-row gap-8">
 
           {/* ── Cinema hall ──────────────────────────── */}
-          <div className="flex-1 overflow-x-auto">
+          <div className="flex-1">
+
             {/* Screen */}
-            <div className="mb-8 text-center">
-              <div className="h-2 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full mb-1 max-w-xl mx-auto" />
-              <p className="text-gray-500 text-xs tracking-widest uppercase">Screen</p>
+            <div className="mb-10 text-center">
+              <div className="relative max-w-lg mx-auto">
+                <div className="h-2 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-[50%]" />
+                <div className="h-8 bg-gradient-to-b from-white/5 to-transparent rounded-b-[50%] -mt-px mx-8" />
+              </div>
+              <p className="text-gray-600 text-xs tracking-[4px] uppercase mt-2">Screen</p>
             </div>
 
-            {/* Seat grid */}
-            <div className="space-y-6 min-w-[380px]">
-              {layout.map(section => (
-                <div key={section.id}>
-                  {/* Section label */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`h-px flex-1 ${section.id === 'vip' ? 'bg-amber-700/30' : section.id === 'deluxe' ? 'bg-blue-700/30' : 'bg-white/8'}`} />
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                      section.id === 'vip' ? 'text-amber-400' : section.id === 'deluxe' ? 'text-blue-400' : 'text-gray-500'
-                    }`}>
-                      {section.label} — Nu. {section.price}
-                    </span>
-                    <div className={`h-px flex-1 ${section.id === 'vip' ? 'bg-amber-700/30' : section.id === 'deluxe' ? 'bg-blue-700/30' : 'bg-white/8'}`} />
-                  </div>
+            {/* Rows */}
+            <div className="overflow-x-auto">
+              <div className="space-y-7 min-w-[420px] max-w-2xl mx-auto">
+                {layout.map((section, si) => (
+                  <div key={section.id}>
+                    {/* Section divider */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`h-px flex-1 ${si===0?'bg-white/6':si===1?'bg-blue-900/30':'bg-amber-900/30'}`} />
+                      <span className={`text-[10px] font-bold uppercase tracking-[2px] ${sectionColor(section.id)}`}>
+                        {section.label} · Nu. {section.price}
+                      </span>
+                      <div className={`h-px flex-1 ${si===0?'bg-white/6':si===1?'bg-blue-900/30':'bg-amber-900/30'}`} />
+                    </div>
 
-                  {/* Rows */}
-                  <div className="space-y-2">
-                    {section.rows.map(({ row, seats }) => (
-                      <div key={row} className="flex items-center gap-3">
-                        <span className="text-gray-600 text-xs font-mono w-4 text-right flex-shrink-0">{row}</span>
-                        {/* Left half */}
-                        <div className="flex gap-1.5">
-                          {seats.slice(0, Math.ceil(seats.length / 2)).map(seat => (
-                            <SeatBtn key={seat.id} seat={seat} selected={!!selected.find(s => s.id === seat.id)} onToggle={toggle} />
-                          ))}
+                    <div className="space-y-2">
+                      {section.rows.map(({ row, seats }) => (
+                        <div key={row} className="flex items-center gap-3">
+                          <span className="text-gray-700 text-xs font-mono w-5 text-right flex-shrink-0">{row}</span>
+                          {/* Left block */}
+                          <div className="flex gap-1.5">
+                            {seats.slice(0, Math.ceil(seats.length / 2)).map(seat => (
+                              <button key={seat.id} disabled={seat.occupied} onClick={() => toggle(seat)}
+                                title={seat.occupied ? 'Booked' : `Seat ${seat.id}`}
+                                className={`w-7 h-6 rounded-t-md border text-[9px] font-bold transition-all duration-150 ${seatCls(seat.type, !!selected.find(s=>s.id===seat.id), seat.occupied)}`}>
+                                {seat.num}
+                              </button>
+                            ))}
+                          </div>
+                          {/* Aisle */}
+                          <div className="w-5 flex-shrink-0 flex items-center justify-center">
+                            <div className="h-4 w-px bg-white/6" />
+                          </div>
+                          {/* Right block */}
+                          <div className="flex gap-1.5">
+                            {seats.slice(Math.ceil(seats.length / 2)).map(seat => (
+                              <button key={seat.id} disabled={seat.occupied} onClick={() => toggle(seat)}
+                                title={seat.occupied ? 'Booked' : `Seat ${seat.id}`}
+                                className={`w-7 h-6 rounded-t-md border text-[9px] font-bold transition-all duration-150 ${seatCls(seat.type, !!selected.find(s=>s.id===seat.id), seat.occupied)}`}>
+                                {seat.num}
+                              </button>
+                            ))}
+                          </div>
+                          <span className="text-gray-700 text-xs font-mono w-5 flex-shrink-0">{row}</span>
                         </div>
-                        {/* Aisle */}
-                        <div className="w-4 flex-shrink-0" />
-                        {/* Right half */}
-                        <div className="flex gap-1.5">
-                          {seats.slice(Math.ceil(seats.length / 2)).map(seat => (
-                            <SeatBtn key={seat.id} seat={seat} selected={!!selected.find(s => s.id === seat.id)} onToggle={toggle} />
-                          ))}
-                        </div>
-                        <span className="text-gray-600 text-xs font-mono w-4 flex-shrink-0">{row}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap gap-5 mt-8 pt-6 border-t border-white/6">
+            <div className="flex flex-wrap justify-center gap-5 mt-10 pt-8 border-t border-white/6">
               {[
-                { label: 'Available', color: 'bg-zinc-700 border-zinc-600' },
-                { label: 'Selected',  color: 'bg-[#E50914] border-[#E50914]' },
-                { label: 'Booked',    color: 'bg-white/10 border-white/6' },
-                { label: 'Deluxe',   color: 'bg-blue-900/60 border-blue-700/50' },
-                { label: 'VIP',      color: 'bg-amber-900/60 border-amber-700/50' },
-              ].map(({ label, color }) => (
+                { label: 'Available', cls: 'bg-zinc-800 border-zinc-700' },
+                { label: 'Selected',  cls: 'bg-[#E50914] border-[#E50914]' },
+                { label: 'Booked',    cls: 'bg-white/6 border-white/5 opacity-40' },
+                { label: 'Deluxe',    cls: 'bg-blue-950/70 border-blue-800/50' },
+                { label: 'VIP',       cls: 'bg-amber-950/70 border-amber-800/50' },
+              ].map(({ label, cls }) => (
                 <div key={label} className="flex items-center gap-2">
-                  <div className={`w-5 h-5 rounded-t border ${color} flex-shrink-0`} />
-                  <span className="text-gray-500 text-xs">{label}</span>
+                  <div className={`w-6 h-5 rounded-t border ${cls} flex-shrink-0`} />
+                  <span className="text-gray-600 text-xs">{label}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── Booking summary ──────────────────────── */}
-          <div className="lg:w-72 flex-shrink-0">
-            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sticky top-24">
-              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <Ticket size={16} className="text-[#E50914]" />
-                Booking Summary
-              </h3>
+          {/* ── Summary panel ─────────────────────────── */}
+          <div className="xl:w-72 flex-shrink-0">
+            <div className="bg-[#181818] border border-white/8 rounded-2xl overflow-hidden sticky top-32">
 
-              {/* Show info */}
-              <div className="bg-white/4 rounded-xl p-3 mb-4">
-                <p className="text-white text-sm font-semibold line-clamp-1">{movie.title}</p>
-                <p className="text-gray-400 text-xs mt-1">{showtime.day}, {showtime.date}</p>
-                <p className="text-gray-400 text-xs">{showtime.time} · {showtime.hall}</p>
+              {/* Panel header */}
+              <div className="px-5 py-4 border-b border-white/6 flex items-center gap-2">
+                <Ticket size={15} className="text-[#E50914]" />
+                <span className="text-white font-bold text-sm">Your Selection</span>
+                {selected.length > 0 && (
+                  <span className="ml-auto bg-[#E50914] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {selected.length}
+                  </span>
+                )}
               </div>
 
-              {/* Selected seats */}
-              {selected.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-gray-600 text-sm">No seats selected</p>
-                  <p className="text-gray-700 text-xs mt-1">Click seats to select</p>
+              {/* Movie + show info */}
+              <div className="p-4 border-b border-white/6">
+                <div className="flex gap-3">
+                  <div className="w-12 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+                    <img src={movie.poster} alt="" className="w-full object-cover" onError={e => e.target.style.display='none'} />
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-semibold leading-tight line-clamp-2">{movie.title}</p>
+                    <p className="text-gray-600 text-xs mt-1">{showtime.day} · {showtime.time}</p>
+                    <p className="text-gray-700 text-xs">{showtime.hall}</p>
+                  </div>
                 </div>
-              ) : (
-                <div className="mb-4">
-                  <p className="text-gray-400 text-xs uppercase tracking-widest mb-2">Selected Seats</p>
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto">
+              </div>
+
+              {/* Seat list */}
+              <div className="p-4">
+                {selected.length === 0 ? (
+                  <div className="text-center py-6">
+                    <div className="w-10 h-10 bg-white/4 rounded-xl flex items-center justify-center mx-auto mb-2">
+                      <Info size={16} className="text-gray-600" />
+                    </div>
+                    <p className="text-gray-600 text-sm">No seats selected</p>
+                    <p className="text-gray-700 text-xs mt-0.5">Tap seats to select (max 8)</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto scroll-container">
                     {selected.map(seat => {
-                      const section = layout.find(s => s.id === seat.type);
+                      const sec = layout.find(s => s.id === seat.type);
                       return (
-                        <div key={seat.id} className="flex items-center justify-between text-sm">
-                          <span className="text-white font-mono font-bold">{seat.id}</span>
-                          <span className={`text-xs ${seat.type === 'vip' ? 'text-amber-400' : seat.type === 'deluxe' ? 'text-blue-400' : 'text-gray-400'}`}>
-                            {section?.label}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-300 text-xs">Nu. {section?.price}</span>
-                            <button onClick={() => toggle(seat)} className="text-gray-600 hover:text-red-400 transition-colors">
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
+                        <div key={seat.id} className="flex items-center gap-2 bg-white/4 rounded-xl px-3 py-2.5">
+                          <span className={`text-xs font-bold font-mono ${sectionColor(seat.type)}`}>{seat.id}</span>
+                          <span className="text-gray-600 text-xs capitalize flex-1">{seat.type}</span>
+                          <span className="text-white text-xs font-semibold">Nu. {sec?.price}</span>
+                          <button onClick={() => toggle(seat)} className="text-gray-700 hover:text-red-400 transition-colors ml-1">
+                            <X size={12} />
+                          </button>
                         </div>
                       );
                     })}
                   </div>
-                </div>
-              )}
-
-              {/* Total */}
-              {selected.length > 0 && (
-                <div className="border-t border-white/8 pt-3 mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-sm">{selected.length} × ticket</span>
-                    <span className="text-white font-black text-lg">Nu. {totalPrice}</span>
-                  </div>
-                  <p className="text-gray-600 text-xs mt-0.5">All taxes included</p>
-                </div>
-              )}
-
-              {/* Max seats notice */}
-              {selected.length >= 8 && (
-                <p className="text-yellow-400 text-xs mb-3 flex items-center gap-1.5">
-                  <AlertCircle size={12} /> Max 8 seats per booking
-                </p>
-              )}
-
-              {/* Error */}
-              {error && (
-                <p className="text-red-400 text-xs mb-3 flex items-center gap-1.5">
-                  <AlertCircle size={12} /> {error}
-                </p>
-              )}
-
-              <button
-                onClick={handleConfirm}
-                disabled={selected.length === 0 || loading}
-                className="w-full py-3.5 bg-[#E50914] hover:bg-[#c8000f] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
-              >
-                {loading ? (
-                  <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Processing…</>
-                ) : (
-                  <><Ticket size={15} /> Confirm Booking</>
                 )}
-              </button>
 
-              {!isAuthenticated && (
-                <p className="text-center text-gray-600 text-xs mt-3">
-                  You'll be asked to <Link to="/login" className="text-[#E50914] hover:underline">sign in</Link> to complete
-                </p>
-              )}
+                {/* Total */}
+                {selected.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-white/6">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-gray-500 text-sm">{selected.length} × ticket</span>
+                      <span className="text-white font-black text-xl">Nu. {total}</span>
+                    </div>
+                    <p className="text-gray-700 text-xs text-right">Inclusive of all taxes</p>
+                  </div>
+                )}
+
+                {selected.length >= 8 && (
+                  <div className="flex items-center gap-2 bg-amber-950/40 border border-amber-800/40 text-amber-400 text-xs px-3 py-2 rounded-xl mt-3">
+                    <AlertCircle size={12} className="flex-shrink-0" />
+                    Maximum 8 seats per booking
+                  </div>
+                )}
+
+                <button onClick={confirm} disabled={!selected.length}
+                  className="w-full mt-4 py-3.5 bg-[#E50914] hover:bg-[#c8000f] disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-[0_4px_20px_rgba(229,9,20,0.2)]">
+                  <Ticket size={15} />
+                  {selected.length ? `Confirm ${selected.length} Seat${selected.length>1?'s':''}` : 'Select Seats'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
