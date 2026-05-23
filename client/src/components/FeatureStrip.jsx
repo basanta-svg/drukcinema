@@ -1,22 +1,24 @@
+import { Ticket, LayoutGrid, Smartphone, RotateCcw } from 'lucide-react';
+
 const features = [
-  { icon: '🎟️', title: 'Easy Booking', desc: 'Book in under 60 seconds' },
-  { icon: '💺', title: 'Seat Selection', desc: 'Choose your perfect seat' },
-  { icon: '📱', title: 'E-Tickets', desc: 'Instant mobile tickets' },
-  { icon: '🔄', title: 'Easy Refunds', desc: 'Hassle-free cancellation' },
+  { Icon: Ticket,      title: 'Easy Booking',    desc: 'Book in under 60 seconds' },
+  { Icon: LayoutGrid,  title: 'Seat Selection',   desc: 'Choose your perfect seat' },
+  { Icon: Smartphone,  title: 'E-Tickets',        desc: 'Instant mobile tickets' },
+  { Icon: RotateCcw,   title: 'Easy Refunds',     desc: 'Hassle-free cancellation' },
 ];
 
 const FeatureStrip = () => (
-  <div className="bg-[#1a1a1a] border-y border-[#2a2a2a] py-6">
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {features.map(f => (
-          <div key={f.title} className="flex items-center gap-3 group">
-            <span className="text-2xl">{f.icon}</span>
+  <div className="bg-[#181818] border-y border-white/6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 divide-x divide-white/6">
+        {features.map(({ Icon, title, desc }) => (
+          <div key={title} className="flex items-center gap-3 px-4 first:pl-0 group">
+            <div className="w-9 h-9 flex-shrink-0 rounded-lg bg-[#E50914]/10 border border-[#E50914]/20 flex items-center justify-center group-hover:bg-[#E50914]/20 transition-colors">
+              <Icon size={16} className="text-[#E50914]" />
+            </div>
             <div>
-              <p className="text-white font-semibold text-sm group-hover:text-[#E50914] transition-colors">
-                {f.title}
-              </p>
-              <p className="text-gray-500 text-xs">{f.desc}</p>
+              <p className="text-white font-semibold text-sm leading-tight">{title}</p>
+              <p className="text-gray-500 text-xs mt-0.5">{desc}</p>
             </div>
           </div>
         ))}
