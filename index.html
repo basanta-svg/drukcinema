@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrukCinema — Book Movie Tickets in Bhutan</title>
+  <meta name="description" content="DrukCinema — Bhutan's premier online movie ticketing platform. Book tickets for Bhutanese and international films.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+
+      <!-- Logo -->
+      <a href="index.html" class="navbar-logo">
+        <span class="logo-druk">DRUK</span><span class="logo-cinema">CINEMA</span>
+      </a>
+
+      <!-- Desktop nav links -->
+      <div class="navbar-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="movies.html">Movies</a>
+        <a href="#cinemas-section">Cinemas</a>
+        <a href="offers.html">Offers</a>
+        <a href="about.html">About</a>
+      </div>
+
+      <!-- Actions -->
+      <div class="navbar-actions">
+        <button class="nav-icon-btn" aria-label="Search">
+          <i class="fas fa-magnifying-glass"></i>
+        </button>
+        <a href="signin.html" class="nav-login-btn">
+          <i class="fas fa-circle-user"></i> Sign In
+        </a>
+        <a href="signin.html" class="nav-register-btn">
+          Register
+        </a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="index.html">Home</a>
+      <a href="movies.html">Movies</a>
+      <a href="#cinemas-section">Cinemas</a>
+      <a href="offers.html">Offers</a>
+      <a href="about.html">About</a>
+      <div class="mobile-menu-divider"></div>
+      <div class="mobile-menu-actions">
+        <a href="signin.html" class="m-login">Sign In</a>
+        <a href="signin.html" class="m-register">Register</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO BANNER
+════════════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+
+  <!-- Backdrop slides -->
+  <div class="hero-slide active" id="slide-0">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&q=80" alt="Lunana backdrop">
+  </div>
+  <div class="hero-slide" id="slide-1">
+    <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&h=1080&fit=crop&q=80" alt="Dragon's Blessing backdrop">
+  </div>
+  <div class="hero-slide" id="slide-2">
+    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&h=1080&fit=crop&q=80" alt="Tiger's Nest backdrop">
+  </div>
+  <div class="hero-slide" id="slide-3">
+    <img src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=1920&h=1080&fit=crop&q=80" alt="GNH backdrop">
+  </div>
+
+  <!-- Overlay -->
+  <div class="hero-overlay"></div>
+  <div class="hero-top-line"></div>
+
+  <!-- Content -->
+  <div class="container hero-content-wrap">
+    <div class="hero-content fade-in">
+
+      <div class="hero-label">
+        <div class="hero-label-line"></div>
+        <span>Featured Film</span>
+      </div>
+
+      <h1 class="hero-title" id="heroTitle">Lunana: A Yak in the Classroom</h1>
+
+      <div class="hero-meta">
+        <div class="meta-rating">
+          <i class="fas fa-star"></i>
+          <span id="heroRating">8.4</span>
+        </div>
+        <div class="meta-info">
+          <i class="fas fa-clock"></i>
+          <span id="heroDuration">109 min</span>
+        </div>
+        <span class="meta-dot">·</span>
+        <span id="heroLanguage">Dzongkha</span>
+      </div>
+
+      <div class="hero-genres" id="heroGenres">
+        <span class="genre-tag">Drama</span>
+        <span class="genre-tag">Adventure</span>
+      </div>
+
+      <p class="hero-description" id="heroDesc">
+        A young teacher is sent to the most remote school in the world, nestled in the Himalayan mountains of Bhutan. Far from his dream of moving to Australia, he discovers the true meaning of life and community.
+      </p>
+
+      <div class="hero-actions">
+        <a href="booking.html?id=1" class="btn btn-primary">
+          <i class="fas fa-ticket"></i> Book Now
+        </a>
+        <button class="btn btn-secondary">
+          <i class="fas fa-play"></i> Watch Trailer
+        </button>
+      </div>
+
+      <p class="hero-price">
+        Tickets from <strong>Nu. <span id="heroPrice">150</span></strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- Slide indicators -->
+  <div class="hero-indicators">
+    <div class="container">
+      <div class="hero-indicators-inner">
+        <button class="indicator-dot active" data-index="0" aria-label="Slide 1"></button>
+        <button class="indicator-dot" data-index="1" aria-label="Slide 2"></button>
+        <button class="indicator-dot" data-index="2" aria-label="Slide 3"></button>
+        <button class="indicator-dot" data-index="3" aria-label="Slide 4"></button>
+        <span class="indicator-count" id="indicatorCount">1 / 4</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FEATURE STRIP
+════════════════════════════════════════════════════════════════ -->
+<div class="feature-strip">
+  <div class="container">
+    <div class="feature-strip-inner">
+      <div class="feature-item">
+        <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+        <div class="feature-text">
+          <h4>Quick Booking</h4>
+          <p>Book in under 60 seconds</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon"><i class="fas fa-couch"></i></div>
+        <div class="feature-text">
+          <h4>Seat Selection</h4>
+          <p>Choose your perfect seat</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon"><i class="fas fa-mobile-screen"></i></div>
+        <div class="feature-text">
+          <h4>E-Tickets</h4>
+          <p>Instant mobile tickets</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon"><i class="fas fa-rotate-left"></i></div>
+        <div class="feature-text">
+          <h4>Easy Refunds</h4>
+          <p>Hassle-free cancellation</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NOW SHOWING
+════════════════════════════════════════════════════════════════ -->
+<section class="carousel-section">
+  <div class="container">
+
+    <div class="section-header">
+      <div class="section-title-group">
+        <div class="section-accent-line"></div>
+        <i class="fas fa-film section-icon"></i>
+        <h2 class="section-title">Now Showing</h2>
+        <span class="section-count">8 films</span>
+      </div>
+      <div class="section-actions">
+        <a href="movies.html" class="see-all-link">
+          See All <i class="fas fa-arrow-right"></i>
+        </a>
+        <button class="carousel-nav-btn" id="nowPrev" aria-label="Scroll left">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="carousel-nav-btn" id="nowNext" aria-label="Scroll right">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="carousel-wrap">
+      <div class="carousel-fade-right"></div>
+      <div class="carousel-track" id="nowShowingTrack">
+
+        <!-- Card 1 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop&q=80" alt="Lunana: A Yak in the Classroom" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>8.4</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-star"></i> <span>8.4 / 10</span>
+              </div>
+              <a href="booking.html?id=1" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Lunana: A Yak in the Classroom</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Drama</span>
+              <span class="genre-tag">Adventure</span>
+            </div>
+            <p class="movie-meta-line">109 min · Dzongkha</p>
+            <p class="movie-price">Nu. 150+</p>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=600&fit=crop&q=80" alt="Travellers & Magicians" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>7.6</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>7.6 / 10</span></div>
+              <a href="booking.html?id=2" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Travellers &amp; Magicians</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Fantasy</span>
+              <span class="genre-tag">Drama</span>
+            </div>
+            <p class="movie-meta-line">108 min · Dzongkha</p>
+            <p class="movie-price">Nu. 150+</p>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=600&fit=crop&q=80" alt="The Cup" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>7.4</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>7.4 / 10</span></div>
+              <a href="booking.html?id=3" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>The Cup (Phörpa)</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Comedy</span>
+              <span class="genre-tag">Drama</span>
+            </div>
+            <p class="movie-meta-line">93 min · Tibetan</p>
+            <p class="movie-price">Nu. 120+</p>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=600&fit=crop&q=80" alt="Hema Hema" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>6.8</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>6.8 / 10</span></div>
+              <a href="booking.html?id=4" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Hema Hema: Sing Me a Song While I Wait</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Mystery</span>
+              <span class="genre-tag">Drama</span>
+            </div>
+            <p class="movie-meta-line">81 min · Dzongkha</p>
+            <p class="movie-price">Nu. 150+</p>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=600&fit=crop&q=80" alt="Dragon's Blessing" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>7.9</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>7.9 / 10</span></div>
+              <a href="booking.html?id=5" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Dragon's Blessing</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Action</span>
+              <span class="genre-tag">Spiritual</span>
+            </div>
+            <p class="movie-meta-line">118 min · Dzongkha</p>
+            <p class="movie-price">Nu. 180+</p>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=600&fit=crop&q=80" alt="Paro: Valley of Love" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>7.2</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>7.2 / 10</span></div>
+              <a href="booking.html?id=6" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Paro: Valley of Love</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Romance</span>
+              <span class="genre-tag">Drama</span>
+            </div>
+            <p class="movie-meta-line">102 min · Dzongkha</p>
+            <p class="movie-price">Nu. 150+</p>
+          </div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop&q=80" alt="Tiger's Nest" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>7.7</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>7.7 / 10</span></div>
+              <a href="booking.html?id=7" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Tiger's Nest</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Thriller</span>
+              <span class="genre-tag">Spiritual</span>
+            </div>
+            <p class="movie-meta-line">112 min · Dzongkha</p>
+            <p class="movie-price">Nu. 150+</p>
+          </div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=400&h=600&fit=crop&q=80" alt="Gross National Happiness" loading="lazy">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>8.1</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>8.1 / 10</span></div>
+              <a href="booking.html?id=8" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Gross National Happiness</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Documentary</span>
+              <span class="genre-tag">Drama</span>
+            </div>
+            <p class="movie-meta-line">95 min · English/Dzongkha</p>
+            <p class="movie-price">Nu. 120+</p>
+          </div>
+        </div>
+
+      </div><!-- /carousel-track -->
+    </div><!-- /carousel-wrap -->
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BHUTAN PROMO BANNER
+════════════════════════════════════════════════════════════════ -->
+<section class="promo-section">
+  <div class="container">
+
+    <div class="promo-banner">
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&h=500&fit=crop&q=80" alt="Bhutan landscape">
+      <div class="promo-overlay"></div>
+      <div class="promo-content">
+        <div class="promo-eyebrow">
+          <div class="promo-eyebrow-line"></div>
+          <span>Discover Bhutanese Cinema</span>
+        </div>
+        <h2>Stories from the <span>Land of Thunder Dragon</span></h2>
+        <p>Authentic Bhutanese storytelling — from monastic life to Himalayan adventures, carrying the soul of Gross National Happiness.</p>
+        <div class="promo-actions">
+          <a href="movies.html" class="btn btn-primary">
+            Explore All Films <i class="fas fa-arrow-right"></i>
+          </a>
+          <button class="btn btn-secondary">About Bhutanese Cinema</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="promo-stats">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-film"></i></div>
+        <div class="stat-value">50+</div>
+        <div class="stat-label">Bhutanese Films</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-location-dot"></i></div>
+        <div class="stat-value">4</div>
+        <div class="stat-label">Cinema Halls</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-value">10K+</div>
+        <div class="stat-label">Happy Viewers</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COMING SOON
+════════════════════════════════════════════════════════════════ -->
+<section class="carousel-section" style="padding-top:0">
+  <div class="container">
+
+    <div class="section-header">
+      <div class="section-title-group">
+        <div class="section-accent-line"></div>
+        <i class="fas fa-clock section-icon"></i>
+        <h2 class="section-title">Coming Soon</h2>
+        <span class="section-count">6 films</span>
+      </div>
+      <div class="section-actions">
+        <a href="movies.html" class="see-all-link">
+          See All <i class="fas fa-arrow-right"></i>
+        </a>
+        <button class="carousel-nav-btn" id="soonPrev" aria-label="Scroll left">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="carousel-nav-btn" id="soonNext" aria-label="Scroll right">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="carousel-wrap">
+      <div class="carousel-fade-right"></div>
+      <div class="carousel-track" id="comingSoonTrack">
+
+        <!-- Soon 1 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&h=600&fit=crop&q=80" alt="Wangchuck: The Dragon King" loading="lazy">
+            <div class="card-badges">
+              <span class="soon-badge">Soon</span>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-calendar"></i> <span>June 2026</span>
+              </div>
+              <button class="overlay-btn overlay-btn-notify">
+                <i class="fas fa-bell"></i> Notify Me
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Wangchuck: The Dragon King</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Historical</span>
+              <span class="genre-tag">Epic</span>
+            </div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> June 2026</p>
+          </div>
+        </div>
+
+        <!-- Soon 2 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=600&fit=crop&q=80" alt="Bhutan Calling" loading="lazy">
+            <div class="card-badges">
+              <span class="soon-badge">Soon</span>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-calendar"></i> <span>July 2026</span>
+              </div>
+              <button class="overlay-btn overlay-btn-notify">
+                <i class="fas fa-bell"></i> Notify Me
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Bhutan Calling</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Comedy</span>
+              <span class="genre-tag">Romance</span>
+            </div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> July 2026</p>
+          </div>
+        </div>
+
+        <!-- Soon 3 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop&q=80" alt="The Last Yak Herder" loading="lazy">
+            <div class="card-badges">
+              <span class="soon-badge">Soon</span>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-calendar"></i> <span>August 2026</span>
+              </div>
+              <button class="overlay-btn overlay-btn-notify">
+                <i class="fas fa-bell"></i> Notify Me
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>The Last Yak Herder</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Drama</span>
+              <span class="genre-tag">Adventure</span>
+            </div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> August 2026</p>
+          </div>
+        </div>
+
+        <!-- Soon 4 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=600&fit=crop&q=80" alt="Thimphu Nights" loading="lazy">
+            <div class="card-badges">
+              <span class="soon-badge">Soon</span>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-calendar"></i> <span>September 2026</span>
+              </div>
+              <button class="overlay-btn overlay-btn-notify">
+                <i class="fas fa-bell"></i> Notify Me
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Thimphu Nights</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Crime</span>
+              <span class="genre-tag">Thriller</span>
+            </div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> September 2026</p>
+          </div>
+        </div>
+
+        <!-- Soon 5 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=600&fit=crop&q=80" alt="The Masked Dancer" loading="lazy">
+            <div class="card-badges">
+              <span class="soon-badge">Soon</span>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-calendar"></i> <span>October 2026</span>
+              </div>
+              <button class="overlay-btn overlay-btn-notify">
+                <i class="fas fa-bell"></i> Notify Me
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>The Masked Dancer</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Cultural</span>
+              <span class="genre-tag">Musical</span>
+            </div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> October 2026</p>
+          </div>
+        </div>
+
+        <!-- Soon 6 -->
+        <div class="movie-card">
+          <div class="movie-poster-wrap">
+            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=600&fit=crop&q=80" alt="Himalayan Sky" loading="lazy">
+            <div class="card-badges">
+              <span class="soon-badge">Soon</span>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date">
+                <i class="fas fa-calendar"></i> <span>November 2026</span>
+              </div>
+              <button class="overlay-btn overlay-btn-notify">
+                <i class="fas fa-bell"></i> Notify Me
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>Himalayan Sky</h3>
+            <div class="movie-genres">
+              <span class="genre-tag">Sci-Fi</span>
+              <span class="genre-tag">Adventure</span>
+            </div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> November 2026</p>
+          </div>
+        </div>
+
+      </div><!-- /carousel-track -->
+    </div><!-- /carousel-wrap -->
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CTA BANNER
+════════════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-banner">
+      <div>
+        <div class="cta-eyebrow">
+          <i class="fas fa-ticket"></i> Weekend Special
+        </div>
+        <h2>Book Your Seats Today</h2>
+        <p>Premium seats available this weekend. Bhutan's finest cinema experience awaits.</p>
+      </div>
+      <button class="cta-btn" onclick="window.location.href='booking.html'">
+        Book Now <i class="fas fa-ticket"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CINEMA LOCATIONS
+════════════════════════════════════════════════════════════════ -->
+<section class="cinemas-section" id="cinemas-section">
+  <div class="container">
+
+    <div class="section-header">
+      <div class="section-title-group">
+        <div class="section-accent-line"></div>
+        <i class="fas fa-building section-icon"></i>
+        <h2 class="section-title">Our Cinemas</h2>
+      </div>
+    </div>
+    <div class="section-divider"></div>
+
+    <div class="cinemas-grid">
+
+      <div class="cinema-card">
+        <div class="cinema-card-header">
+          <div class="cinema-icon-wrap"><i class="fas fa-building"></i></div>
+          <span class="status-open">OPEN</span>
+        </div>
+        <p class="cinema-name">Thimphu City Cinema</p>
+        <p class="cinema-address"><i class="fas fa-location-dot"></i> Norzin Lam, Thimphu</p>
+        <p class="cinema-screens"><i class="fas fa-film"></i> 3 Screens</p>
+        <a href="booking.html" class="cinema-view-btn">View Shows</a>
+      </div>
+
+      <div class="cinema-card">
+        <div class="cinema-card-header">
+          <div class="cinema-icon-wrap"><i class="fas fa-desktop"></i></div>
+          <span class="status-open">OPEN</span>
+        </div>
+        <p class="cinema-name">Paro Multiplex</p>
+        <p class="cinema-address"><i class="fas fa-location-dot"></i> Town Center, Paro</p>
+        <p class="cinema-screens"><i class="fas fa-film"></i> 2 Screens</p>
+        <a href="booking.html" class="cinema-view-btn">View Shows</a>
+      </div>
+
+      <div class="cinema-card">
+        <div class="cinema-card-header">
+          <div class="cinema-icon-wrap"><i class="fas fa-location-dot"></i></div>
+          <span class="status-open">OPEN</span>
+        </div>
+        <p class="cinema-name">Punakha Cinema</p>
+        <p class="cinema-address"><i class="fas fa-location-dot"></i> Main Road, Punakha</p>
+        <p class="cinema-screens"><i class="fas fa-film"></i> 1 Screen</p>
+        <a href="booking.html" class="cinema-view-btn">View Shows</a>
+      </div>
+
+      <div class="cinema-card">
+        <div class="cinema-card-header">
+          <div class="cinema-icon-wrap"><i class="fas fa-location-dot"></i></div>
+          <span class="status-soon">SOON</span>
+        </div>
+        <p class="cinema-name">Bumthang Theatre</p>
+        <p class="cinema-address"><i class="fas fa-location-dot"></i> Jakar, Bumthang</p>
+        <p class="cinema-screens"><i class="fas fa-film"></i> 1 Screen</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+
+    <div class="footer-main">
+      <!-- Brand -->
+      <div>
+        <div class="footer-logo">
+          <span class="logo-druk">DRUK</span><span class="logo-cinema">CINEMA</span>
+        </div>
+        <p class="footer-desc">
+          Bhutan's premier movie ticketing platform. Experience the magic of Bhutanese and international cinema in the Land of the Thunder Dragon.
+        </p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" aria-label="X / Twitter"><i class="fab fa-x-twitter"></i></a>
+          <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <!-- Explore -->
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="movies.html">Now Showing</a></li>
+          <li><a href="movies.html">Coming Soon</a></li>
+          <li><a href="movies.html">Top Rated</a></li>
+          <li><a href="movies.html">Bhutanese Films</a></li>
+          <li><a href="movies.html">International</a></li>
+        </ul>
+      </div>
+
+      <!-- Cinemas -->
+      <div class="footer-col">
+        <h4>Cinemas</h4>
+        <ul>
+          <li><a href="#">Thimphu City Cinema</a></li>
+          <li><a href="#">Paro Multiplex</a></li>
+          <li><a href="#">Punakha Cinema</a></li>
+          <li><a href="#">Bumthang Theatre</a></li>
+        </ul>
+      </div>
+
+      <!-- Help -->
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Booking Guide</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Contact Support</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About DrukCinema</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Advertise</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="footer-newsletter">
+      <div class="newsletter-inner">
+        <div class="newsletter-left">
+          <div class="newsletter-icon"><i class="fas fa-envelope"></i></div>
+          <div class="newsletter-text">
+            <p>Never miss a premiere</p>
+            <p>Get notified about new films and special screenings</p>
+          </div>
+        </div>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="your@email.com" aria-label="Email address">
+          <button class="newsletter-submit">
+            Subscribe <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="footer-bottom">
+      <p>&copy; 2026 DrukCinema</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <span class="footer-divider">|</span>
+        <a href="#">Terms</a>
+        <span class="footer-divider">|</span>
+        <a href="#">Cookies</a>
+        <span class="footer-divider">|</span>
+        <span class="footer-made">Made in Bhutan 🐉</span>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/main.js"></script>
+</body>
+</html>

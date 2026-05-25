@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookings — DrukCinema Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-film"></i></div>
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">DrukCinema</span>
+          <span class="sidebar-brand-sub">Admin Panel</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Management</div>
+      <a href="dashboard.html">                <i class="fas fa-gauge-high"></i>   Dashboard</a>
+      <a href="movies.html">                    <i class="fas fa-film"></i>          Movies</a>
+      <a href="showtimes.html">                 <i class="fas fa-calendar-alt"></i> Showtimes</a>
+      <a href="bookings.html"  class="active">  <i class="fas fa-ticket"></i>        Bookings</a>
+      <div class="nav-section-label">Counter</div>
+      <a href="offline-booking.html">           <i class="fas fa-cash-register"></i> Offline Booking</a>
+      <a href="print-ticket.html">              <i class="fas fa-print"></i>          Print Tickets</a>
+      <a href="#" class="nav-logout" onclick="adminLogout()"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+    </nav>
+    <div class="sidebar-footer">DrukCinema Admin v1.0<br>© 2026 All rights reserved</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="topbar-left">
+          <h2>Bookings</h2>
+          <p>View and manage all online and offline bookings</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-outline btn-sm print-hide" onclick="exportCSV()">
+          <i class="fas fa-download"></i> Export CSV
+        </button>
+        <div class="topbar-divider"></div>
+        <div class="topbar-user">
+          <div class="topbar-avatar"><i class="fas fa-user"></i></div>
+          <div class="topbar-user-info">
+            <span class="topbar-username" id="topbarUser"></span>
+            <span class="topbar-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-body">
+
+      <!-- Summary Stats Row -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px" id="bStats">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fas fa-list"></i></div>
+          <div class="stat-value" id="bsTotal">—</div>
+          <div class="stat-label">Total Bookings</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-value" id="bsConfirmed">—</div>
+          <div class="stat-label">Confirmed</div>
+        </div>
+        <div class="stat-card stat-gold">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-value" id="bsPending">—</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon"><i class="fas fa-coins"></i></div>
+          <div class="stat-value" id="bsRevenue">—</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <span class="filter-label">Filter:</span>
+        <input type="date"   id="fDate"   class="filter-control" onchange="renderTable()" title="Filter by date">
+        <select              id="fMovie"  class="filter-control" onchange="renderTable()"><option value="">All Movies</option></select>
+        <select              id="fStatus" class="filter-control" onchange="renderTable()">
+          <option value="">All Status</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="pending">Pending</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <select              id="fType"   class="filter-control" onchange="renderTable()">
+          <option value="">Online + Offline</option>
+          <option value="online">Online Only</option>
+          <option value="offline">Offline / Counter</option>
+        </select>
+        <input type="text"   id="fSearch" class="filter-control" placeholder="Search name / ID…" oninput="renderTable()" style="min-width:160px">
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">
+          <i class="fas fa-xmark"></i> Clear
+        </button>
+        <span id="resultCount" style="margin-left:auto;font-size:12px;color:var(--text3)"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-ticket"></i> All Bookings</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Movie</th>
+                <th>Showtime</th>
+                <th>Seats</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--text3)" id="tableFooter"></span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" id="prevBtn" onclick="prevPage()" disabled>
+              <i class="fas fa-chevron-left"></i> Prev
+            </button>
+            <span id="pageInfo" style="font-size:12px;color:var(--text2);padding:6px 8px"></span>
+            <button class="btn btn-ghost btn-sm" id="nextBtn" onclick="nextPage()">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+  checkAuth();
+  document.getElementById('topbarUser').textContent = getLoggedInUser();
+
+  const PER_PAGE = 15;
+  let currentPage = 1;
+  let filteredBookings = [];
+
+  // ── Populate movie filter ──────────────────────────────────
+  function populateMovieFilter() {
+    const movies = getMovies();
+    const sel    = document.getElementById('fMovie');
+    sel.innerHTML = '<option value="">All Movies</option>' +
+      movies.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
+  }
+
+  // ── Load summary stats ─────────────────────────────────────
+  function loadStats() {
+    const all       = getBookings();
+    const confirmed = all.filter(b => b.status === 'confirmed');
+    const pending   = all.filter(b => b.status === 'pending');
+    const revenue   = confirmed.reduce((s, b) => s + (Number(b.amount)||0), 0);
+
+    document.getElementById('bsTotal').textContent     = all.length;
+    document.getElementById('bsConfirmed').textContent = confirmed.length;
+    document.getElementById('bsPending').textContent   = pending.length;
+    document.getElementById('bsRevenue').textContent   = 'Nu. ' + revenue.toLocaleString();
+  }
+
+  // ── Filters & render ──────────────────────────────────────
+  function clearFilters() {
+    ['fDate','fSearch'].forEach(id => document.getElementById(id).value = '');
+    ['fMovie','fStatus','fType'].forEach(id => document.getElementById(id).value = '');
+    currentPage = 1;
+    renderTable();
+  }
+
+  function renderTable() {
+    const fDate   = document.getElementById('fDate').value;
+    const fMovie  = document.getElementById('fMovie').value;
+    const fStatus = document.getElementById('fStatus').value;
+    const fType   = document.getElementById('fType').value;
+    const fSearch = document.getElementById('fSearch').value.toLowerCase();
+
+    let bookings = getBookings();
+
+    if (fDate)   bookings = bookings.filter(b => b.date === fDate);
+    if (fMovie)  bookings = bookings.filter(b => b.movieId === fMovie);
+    if (fStatus) bookings = bookings.filter(b => b.status === fStatus);
+    if (fType)   bookings = bookings.filter(b => b.type === fType);
+    if (fSearch) bookings = bookings.filter(b =>
+      (b.customerName||'').toLowerCase().includes(fSearch) ||
+      (b.id||'').toLowerCase().includes(fSearch) ||
+      (b.phone||'').includes(fSearch)
+    );
+
+    // Sort newest first (by ID, which has a timestamp fragment)
+    bookings = [...bookings].reverse();
+    filteredBookings = bookings;
+
+    const total = bookings.length;
+    const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+    if (currentPage > pages) currentPage = 1;
+
+    const slice = bookings.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+    document.getElementById('resultCount').textContent   = total + ' booking' + (total !== 1 ? 's' : '');
+    document.getElementById('tableFooter').textContent   = `Showing ${slice.length} of ${total}`;
+    document.getElementById('pageInfo').textContent      = `Page ${currentPage} of ${pages}`;
+    document.getElementById('prevBtn').disabled          = currentPage <= 1;
+    document.getElementById('nextBtn').disabled          = currentPage >= pages;
+
+    const tbody = document.getElementById('bookingsTbody');
+    if (slice.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="table-empty"><i class="fas fa-ticket"></i>No bookings match your filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = slice.map(b => `
+      <tr>
+        <td class="td-mono">${esc(b.id)}</td>
+        <td>
+          <div class="td-bold">${esc(b.customerName)}</div>
+          <div style="font-size:11px;color:var(--text3)">${esc(b.phone)}</div>
+        </td>
+        <td>
+          <div style="font-size:12.5px;color:var(--text1);font-weight:500;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${esc(b.movieTitle)}
+          </div>
+        </td>
+        <td>
+          <div style="font-size:12px;font-weight:600">${formatDate(b.date)}</div>
+          <div style="font-size:11px;color:var(--text3)">${b.time} · Hall ${b.hall}</div>
+        </td>
+        <td>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;max-width:120px">
+            ${(b.seats||[]).map(s => `<span style="background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.18);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:700">${s}</span>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${(b.seats||[]).length} seat${(b.seats||[]).length!==1?'s':''}</div>
+        </td>
+        <td><span style="color:var(--gold);font-weight:700;font-size:13px">${formatCurrency(b.amount)}</span></td>
+        <td>${statusBadge(b.type)}</td>
+        <td>${statusBadge(b.status)}</td>
+        <td style="text-align:right">
+          <div style="display:flex;gap:5px;justify-content:flex-end;flex-wrap:nowrap">
+            ${b.status !== 'confirmed' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${b.id}','confirmed')" title="Confirm"><i class="fas fa-check"></i></button>` : ''}
+            ${b.status !== 'cancelled' ? `<button class="btn btn-danger btn-sm" onclick="updateStatus('${b.id}','cancelled')" title="Cancel"><i class="fas fa-ban"></i></button>` : ''}
+            <a href="print-ticket.html?id=${esc(b.id)}" class="btn btn-ghost btn-sm" title="Print Ticket"><i class="fas fa-print"></i></a>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function updateStatus(id, status) {
+    const action = status === 'confirmed' ? 'confirm' : 'cancel';
+    if (!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} booking ${id}?`)) return;
+    const bookings = getBookings();
+    const b = bookings.find(x => x.id === id);
+    if (b) { b.status = status; saveBookings(bookings); }
+    renderTable();
+    loadStats();
+    showToast(`Booking ${action}ed.`, status === 'confirmed' ? 'success' : 'info');
+  }
+
+  function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
+  function nextPage() {
+    const pages = Math.ceil(filteredBookings.length / PER_PAGE);
+    if (currentPage < pages) { currentPage++; renderTable(); }
+  }
+
+  // ── Export CSV ─────────────────────────────────────────────
+  function exportCSV() {
+    const bookings = filteredBookings.length > 0 ? filteredBookings : getBookings();
+    const header   = ['Booking ID','Customer Name','Phone','Movie','Date','Time','Hall','Seats','Amount','Type','Status'];
+    const rows     = bookings.map(b => [
+      b.id, b.customerName, b.phone, b.movieTitle,
+      b.date, b.time, b.hall,
+      (b.seats||[]).join(' | '),
+      b.amount, b.type, b.status
+    ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
+
+    const csv  = [header, ...rows].map(r => r.join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `drukcinema-bookings-${todayStr()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${bookings.length} bookings to CSV.`);
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  // Init
+  populateMovieFilter();
+  loadStats();
+  renderTable();
+</script>
+</body>
+</html>

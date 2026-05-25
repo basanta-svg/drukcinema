@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Tickets — DrukCinema</title>
+  <meta name="description" content="Select your seats and book tickets at DrukCinema.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    /* ════════════════════════════════════════════════════════
+       BOOKING PAGE — EXTENDED STYLES
+    ════════════════════════════════════════════════════════ */
+
+    body { background: var(--bg-primary); }
+
+    /* ── Movie Header Strip ─────────────────────────────── */
+    .movie-header-strip {
+      background: linear-gradient(to bottom, #0a0a0a, #141414);
+      border-bottom: 1px solid var(--border);
+      padding: 82px 0 0;
+    }
+    .movie-header-inner {
+      display: flex; align-items: center; gap: 20px;
+      padding: 20px 0 22px;
+    }
+    .movie-poster-thumb {
+      width: 56px; height: 84px;
+      border-radius: 8px; object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    }
+    .movie-header-meta h1 {
+      font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 10px;
+    }
+    .show-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .show-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 20px;
+      font-size: 12px; color: var(--text-sec);
+    }
+    .show-pill i { color: var(--accent); font-size: 11px; }
+
+    /* ── Progress bar ───────────────────────────────────── */
+    .progress-bar-wrap {
+      background: #0f0f0f;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .progress-steps {
+      display: flex; align-items: center; max-width: 420px;
+    }
+    .pstep {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600;
+    }
+    .pstep-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .pstep.active .pstep-num  { background: var(--accent); color: white; box-shadow: 0 0 10px var(--shadow-red); }
+    .pstep.done   .pstep-num  { background: #16a34a; color: white; }
+    .pstep.pend   .pstep-num  { background: #222; color: #555; border: 1px solid #333; }
+    .pstep.active .pstep-lbl  { color: white; }
+    .pstep.done   .pstep-lbl  { color: #4ade80; }
+    .pstep.pend   .pstep-lbl  { color: var(--text-muted); }
+    .pconn {
+      flex: 1; height: 1px; background: #2a2a2a;
+      margin: 0 12px; min-width: 30px;
+    }
+    .pconn.done { background: #16a34a; }
+
+    /* ── Page layout ────────────────────────────────────── */
+    .booking-page-body {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 28px;
+      padding: 28px 0 64px;
+      align-items: start;
+    }
+
+    /* ── Date & Showtime selectors ──────────────────────── */
+    .selector-group { margin-bottom: 22px; }
+    .sel-label {
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .sel-label i { color: var(--accent); font-size: 12px; }
+    .date-scroller, .time-scroller {
+      display: flex; gap: 8px;
+      overflow-x: auto; padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .date-scroller::-webkit-scrollbar,
+    .time-scroller::-webkit-scrollbar { display: none; }
+
+    .date-chip {
+      flex-shrink: 0; text-align: center;
+      padding: 10px 18px; border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent; cursor: pointer;
+      transition: all var(--tr);
+    }
+    .date-chip .dc-day  { font-size: 10px; color: var(--text-muted); display: block; letter-spacing: 1px; text-transform: uppercase; }
+    .date-chip .dc-num  { font-size: 20px; font-weight: 800; color: white; display: block; line-height: 1.2; font-family: 'Poppins', sans-serif; }
+    .date-chip .dc-mon  { font-size: 10px; color: var(--text-muted); display: block; }
+    .date-chip:hover    { border-color: rgba(255,255,255,0.3); }
+    .date-chip.active   { border-color: var(--accent); background: rgba(229,9,20,0.1); }
+    .date-chip.active .dc-day, .date-chip.active .dc-mon { color: rgba(229,9,20,0.7); }
+    .date-chip.active .dc-num { color: var(--accent); }
+
+    .time-chip {
+      flex-shrink: 0; padding: 9px 20px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      font-weight: 600; color: var(--text-sec);
+      transition: all var(--tr);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .time-chip .avail-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #4ade80;
+    }
+    .time-chip.full .avail-dot { background: var(--accent); }
+    .time-chip:hover   { border-color: rgba(255,255,255,0.3); color: white; }
+    .time-chip.active  { border-color: var(--accent); background: rgba(229,9,20,0.1); color: white; }
+
+    /* ── Seat Map Card ──────────────────────────────────── */
+    .seatmap-card {
+      background: #181818;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .seatmap-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .seatmap-title {
+      font-size: 14px; font-weight: 700; color: white;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .seatmap-title i { color: var(--accent); }
+    .seat-count-badge {
+      background: rgba(229,9,20,0.1);
+      border: 1px solid rgba(229,9,20,0.25);
+      color: var(--accent);
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+
+    /* Scrollable seat area */
+    .seatmap-scroll {
+      overflow-x: auto;
+      padding: 32px 24px 24px;
+      min-height: 500px;
+    }
+    .seatmap-inner {
+      min-width: 560px;
+    }
+
+    /* ── SCREEN ─────────────────────────────────────────── */
+    .screen-zone {
+      text-align: center;
+      margin-bottom: 44px;
+      position: relative;
+    }
+    /* 3-D screen bar */
+    .screen-viz {
+      position: relative;
+      width: 82%;
+      margin: 0 auto;
+      height: 56px;
+    }
+    .screen-viz::before {
+      /* the glowing line = screen surface */
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(to right,
+        rgba(255,255,255,0.02) 0%,
+        rgba(255,255,255,0.55) 18%,
+        rgba(255,255,255,0.95) 50%,
+        rgba(255,255,255,0.55) 82%,
+        rgba(255,255,255,0.02) 100%
+      );
+      border-radius: 50%;
+      box-shadow:
+        0 0 16px 3px rgba(255,255,255,0.55),
+        0 0 48px 10px rgba(255,255,255,0.22),
+        0 0 90px 22px rgba(255,255,255,0.08);
+      transform: perspective(300px) rotateX(-18deg);
+    }
+    .screen-viz::after {
+      /* projection light cone below the screen */
+      content: '';
+      position: absolute;
+      bottom: 5px; left: 8%; right: 8%;
+      height: 51px;
+      background: linear-gradient(to bottom,
+        rgba(255,255,255,0.055) 0%,
+        rgba(255,255,255,0.012) 55%,
+        transparent 100%
+      );
+      border-radius: 0 0 60% 60%;
+    }
+    .screen-label-text {
+      margin-top: 14px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 6px; text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      font-family: 'Poppins', sans-serif;
+    }
+    .screen-sublabel {
+      font-size: 10px; color: rgba(255,255,255,0.15);
+      margin-top: 4px; letter-spacing: 1px;
+    }
+
+    /* ── Seat Categories ────────────────────────────────── */
+    .seat-category { margin-bottom: 4px; }
+    .seat-category + .seat-category { margin-top: 20px; }
+
+    .cat-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 14px; border-radius: 6px; margin-bottom: 14px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.8px;
+    }
+    .cat-bar-left  { display: flex; align-items: center; gap: 7px; }
+    .cat-bar-right { font-size: 12px; opacity: 0.9; }
+
+    .cat-bar.recliner  { background: rgba(245,197,24,0.1);  color: #F5C518; border-left: 3px solid #F5C518; }
+    .cat-bar.execgold  { background: rgba(96,165,250,0.1);  color: #60a5fa; border-left: 3px solid #60a5fa; }
+    .cat-bar.executive { background: rgba(74,222,128,0.1);  color: #4ade80; border-left: 3px solid #4ade80; }
+    .cat-bar.classic   { background: rgba(156,163,175,0.08);color: #9ca3af; border-left: 3px solid #6b7280; }
+
+    /* ── Seat Rows ──────────────────────────────────────── */
+    .s-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .s-row-lbl {
+      width: 18px; flex-shrink: 0;
+      font-size: 11px; font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
+    .s-seats { display: flex; gap: 5px; flex: 1; justify-content: center; }
+    .s-aisle { width: 22px; flex-shrink: 0; }
+
+    /* ── Individual Seat ────────────────────────────────── */
+    .seat {
+      width: 30px; height: 27px;
+      border-radius: 5px 5px 4px 4px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700;
+      position: relative; flex-shrink: 0;
+    }
+    /* Chair back illusion */
+    .seat::before {
+      content: '';
+      position: absolute;
+      top: -3px; left: 3px; right: 3px; height: 3px;
+      border-radius: 3px 3px 0 0;
+      background: inherit;
+      filter: brightness(1.3);
+    }
+
+    /* Available — RECLINER */
+    .cat-recliner .seat-a {
+      background: rgba(245,197,24,0.12);
+      border-color: rgba(245,197,24,0.28);
+      color: rgba(245,197,24,0.5);
+    }
+    .cat-recliner .seat-a:hover {
+      background: rgba(245,197,24,0.32);
+      border-color: #F5C518; color: white;
+      transform: scale(1.15) translateY(-2px);
+      box-shadow: 0 4px 14px rgba(245,197,24,0.3);
+    }
+    /* Available — EXECUTIVE GOLD */
+    .cat-execgold .seat-a {
+      background: rgba(96,165,250,0.12);
+      border-color: rgba(96,165,250,0.28);
+      color: rgba(96,165,250,0.5);
+    }
+    .cat-execgold .seat-a:hover {
+      background: rgba(96,165,250,0.32);
+      border-color: #60a5fa; color: white;
+      transform: scale(1.15) translateY(-2px);
+      box-shadow: 0 4px 14px rgba(96,165,250,0.3);
+    }
+    /* Available — EXECUTIVE */
+    .cat-executive .seat-a {
+      background: rgba(74,222,128,0.1);
+      border-color: rgba(74,222,128,0.25);
+      color: rgba(74,222,128,0.45);
+    }
+    .cat-executive .seat-a:hover {
+      background: rgba(74,222,128,0.28);
+      border-color: #4ade80; color: white;
+      transform: scale(1.15) translateY(-2px);
+      box-shadow: 0 4px 14px rgba(74,222,128,0.25);
+    }
+    /* Available — CLASSIC */
+    .cat-classic .seat-a {
+      background: rgba(160,160,160,0.1);
+      border-color: rgba(160,160,160,0.22);
+      color: rgba(160,160,160,0.4);
+    }
+    .cat-classic .seat-a:hover {
+      background: rgba(229,9,20,0.22);
+      border-color: var(--accent); color: white;
+      transform: scale(1.15) translateY(-2px);
+      box-shadow: 0 4px 14px rgba(229,9,20,0.3);
+    }
+
+    /* Selected — all same red */
+    .seat-s {
+      background: var(--accent) !important;
+      border-color: #ff3b3b !important;
+      color: white !important;
+      transform: scale(1.1) translateY(-2px) !important;
+      box-shadow: 0 4px 16px rgba(229,9,20,0.55) !important;
+    }
+    /* Booked — dark */
+    .seat-b {
+      background: #1a1a1a !important;
+      border-color: #242424 !important;
+      color: #282828 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .seat-b:hover { transform: none !important; box-shadow: none !important; }
+    .seat-b::before { background: #202020 !important; }
+
+    /* ── Legend ─────────────────────────────────────────── */
+    .legend-strip {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 20px; padding: 18px 24px;
+      border-top: 1px solid var(--border);
+      background: #141414;
+    }
+    .leg-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-sec); }
+    .leg-swatch {
+      width: 24px; height: 20px;
+      border-radius: 4px 4px 3px 3px; border: 1px solid;
+    }
+    .ls-recliner  { background: rgba(245,197,24,0.12); border-color: rgba(245,197,24,0.28); }
+    .ls-execgold  { background: rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.28); }
+    .ls-executive { background: rgba(74,222,128,0.1);  border-color: rgba(74,222,128,0.25); }
+    .ls-classic   { background: rgba(160,160,160,0.1); border-color: rgba(160,160,160,0.22); }
+    .ls-selected  { background: var(--accent);         border-color: #ff3b3b; }
+    .ls-booked    { background: #1a1a1a;               border-color: #242424; }
+
+    /* ── Summary Card ───────────────────────────────────── */
+    .summary-sticky { position: sticky; top: 82px; }
+    .sum-card {
+      background: #181818;
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .sum-head {
+      padding: 18px 22px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .sum-head i { color: var(--accent); }
+    .sum-head h3 { font-size: 15px; font-weight: 700; color: white; }
+
+    .sum-movie {
+      padding: 18px 22px; border-bottom: 1px solid var(--border);
+      display: flex; gap: 14px;
+    }
+    .sum-movie img {
+      width: 52px; height: 78px; border-radius: 7px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .sum-movie-info h4 { font-size: 13px; font-weight: 700; color: white; margin-bottom: 8px; line-height: 1.4; }
+    .sum-movie-info p {
+      font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 5px; margin-bottom: 3px;
+    }
+
+    .sum-seats {
+      padding: 16px 22px; border-bottom: 1px solid var(--border);
+    }
+    .sum-seats-lbl {
+      font-size: 10px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
+    }
+    .seats-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; }
+    .s-tag {
+      background: rgba(229,9,20,0.12);
+      border: 1px solid rgba(229,9,20,0.28);
+      color: #ff8080;
+      padding: 3px 10px; border-radius: 6px;
+      font-size: 11px; font-weight: 700;
+    }
+    .no-sel { color: var(--text-muted); font-size: 12px; font-style: italic; }
+
+    /* Category breakdown */
+    .cat-breakdown {
+      padding: 14px 22px; border-bottom: 1px solid var(--border);
+    }
+    .cat-brkdwn-lbl {
+      font-size: 10px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
+    }
+    .brkdwn-row {
+      display: flex; justify-content: space-between;
+      font-size: 12px; margin-bottom: 7px;
+      align-items: center;
+    }
+    .brkdwn-left { display: flex; align-items: center; gap: 7px; color: var(--text-sec); }
+    .brkdwn-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .brkdwn-right { color: white; font-weight: 600; }
+    .brkdwn-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+    .sum-pricing {
+      padding: 16px 22px; border-bottom: 1px solid var(--border);
+    }
+    .sum-row {
+      display: flex; justify-content: space-between;
+      align-items: center; font-size: 12px; margin-bottom: 8px;
+    }
+    .sum-row .lbl { color: var(--text-sec); }
+    .sum-row .val { color: white; font-weight: 500; }
+    .sum-row.total-row {
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1px solid var(--border); margin-bottom: 0;
+    }
+    .sum-row.total-row .lbl { color: white; font-weight: 700; font-size: 14px; }
+    .sum-row.total-row .val { color: var(--accent); font-weight: 800; font-size: 20px; }
+
+    .sum-action { padding: 18px 22px; }
+    .book-btn {
+      width: 100%; padding: 15px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all var(--tr);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .book-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 8px 28px var(--shadow-red);
+      transform: translateY(-2px);
+    }
+    .book-btn:disabled {
+      background: #252525; color: #484848;
+      cursor: not-allowed; box-shadow: none; transform: none;
+    }
+    .book-note {
+      text-align: center; font-size: 11px; color: var(--text-muted);
+      margin-top: 10px; display: flex; align-items: center;
+      justify-content: center; gap: 5px;
+    }
+
+    /* ── Max-seats warning ──────────────────────────────── */
+    .max-warn {
+      display: none; align-items: center; gap: 8px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.2);
+      color: #fbbf24; border-radius: 8px;
+      padding: 9px 14px; margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .max-warn.show { display: flex; }
+
+    /* ── Cancellation note ──────────────────────────────── */
+    .cancel-note {
+      margin-top: 12px; padding: 12px 16px;
+      background: #181818; border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: flex-start; gap: 8px; line-height: 1.6;
+    }
+    .cancel-note i { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+    /* ══════════════════════════════════════════════════
+       E-TICKET MODAL
+    ═══════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .eticket-wrap {
+      width: 100%; max-width: 520px;
+      transform: scale(0.88) translateY(20px);
+      transition: all 0.32s ease;
+    }
+    .modal-overlay.open .eticket-wrap { transform: scale(1) translateY(0); }
+    .eticket {
+      background: #1c1c1c;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+    }
+    .et-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 22px;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .et-logo { font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 2px; }
+    .et-logo .dr { color: var(--accent); }
+    .et-logo .ck { color: white; }
+    .et-close-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .et-close-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+    .et-confirmed-banner {
+      background: linear-gradient(to right, rgba(22,163,74,0.13), rgba(22,163,74,0.04));
+      border-bottom: 1px solid rgba(22,163,74,0.15);
+      padding: 9px 22px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #4ade80; font-weight: 700;
+    }
+    .et-top { padding: 18px 22px 16px; }
+    .et-movie-row { display: flex; gap: 16px; align-items: flex-start; }
+    .et-poster {
+      width: 60px; height: 90px; border-radius: 8px;
+      object-fit: cover; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    .et-movie-details { flex: 1; }
+    .et-movie-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px; font-weight: 800; color: white;
+      line-height: 1.3; margin-bottom: 7px;
+    }
+    .et-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .et-tag {
+      font-size: 10px; font-weight: 700; padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+    }
+    .et-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .et-cell-lbl {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 3px;
+    }
+    .et-cell-val { font-size: 12px; font-weight: 700; color: white; }
+    .et-seats-row { margin-top: 12px; }
+    .et-seats-label {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 7px;
+    }
+    .et-seat-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .et-seat-chip {
+      background: rgba(229,9,20,0.12);
+      border: 1px solid rgba(229,9,20,0.3);
+      color: #ff8080; padding: 3px 10px;
+      border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    /* Tear line */
+    .et-tear {
+      position: relative; height: 1px; margin: 4px 16px;
+      background: repeating-linear-gradient(
+        to right,
+        rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px,
+        transparent 6px, transparent 12px
+      );
+    }
+    .et-tear::before, .et-tear::after {
+      content: ''; position: absolute; top: 50%;
+      transform: translateY(-50%);
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .et-tear::before { left: -26px; }
+    .et-tear::after  { right: -26px; }
+    /* Bottom QR section */
+    .et-bottom {
+      padding: 20px 22px 18px;
+      display: flex; gap: 20px; align-items: flex-start;
+    }
+    .et-qr-col { flex-shrink: 0; text-align: center; }
+    #etQrBox { background: white; padding: 7px; border-radius: 8px; display: inline-block; margin-bottom: 5px; }
+    #etQrBox canvas, #etQrBox img { display: block !important; }
+    .et-ref-code {
+      font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900;
+      letter-spacing: 2px; color: var(--text-muted);
+    }
+    .et-qr-hint { font-size: 9px; color: #333; margin-top: 2px; }
+    .et-right-col { flex: 1; }
+    .et-price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .et-price-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .et-price-val { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 900; color: var(--accent); }
+    .et-status-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(22,163,74,0.1); border: 1px solid rgba(22,163,74,0.25);
+      color: #4ade80; padding: 5px 12px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; margin-bottom: 10px;
+    }
+    .et-email-note {
+      font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: flex-start; gap: 6px; line-height: 1.5;
+    }
+    .et-email-note i { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+    /* Action buttons */
+    .et-actions { display: flex; gap: 8px; padding: 0 22px 20px; flex-wrap: wrap; }
+    .et-btn {
+      flex: 1; min-width: 110px; padding: 11px 14px;
+      border-radius: 10px; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; border: none;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .et-btn-primary { background: var(--accent); color: white; }
+    .et-btn-primary:hover { background: var(--accent-hover); box-shadow: 0 6px 20px var(--shadow-red); }
+    .et-btn-secondary { background: #252525; color: var(--text-sec); border: 1px solid var(--border); }
+    .et-btn-secondary:hover { color: white; border-color: rgba(255,255,255,0.25); }
+    /* Backward compat IDs used by old JS */
+    .modal-btn { display: none; }
+    .modal-box { display: none; }
+
+    /* Seat number col header */
+    .seat-num-header {
+      display: flex; align-items: center; gap: 5px;
+      padding-left: 26px; margin-bottom: 6px;
+    }
+    .snh-spacer { width: 18px; flex-shrink: 0; }
+    .snh-nums { display: flex; gap: 5px; flex: 1; justify-content: center; }
+    .snh-num {
+      width: 30px; text-align: center;
+      font-size: 9px; color: #333; font-weight: 600;
+    }
+    .snh-aisle { width: 22px; flex-shrink: 0; }
+
+    /* ── Hall Selector ──────────────────────────────────────── */
+    .hall-selector {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .hall-chip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 18px; border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent; cursor: pointer;
+      transition: all var(--tr); text-align: left;
+      min-width: 160px;
+    }
+    .hall-chip i {
+      color: var(--text-muted); font-size: 18px; flex-shrink: 0;
+      transition: color var(--tr);
+    }
+    .hall-chip .hall-name {
+      display: block; font-size: 13px; font-weight: 700;
+      color: white; font-family: 'Poppins', sans-serif;
+    }
+    .hall-chip .hall-sub {
+      display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px;
+    }
+    .hall-chip:hover {
+      border-color: rgba(255,255,255,0.3);
+    }
+    .hall-chip:hover i { color: var(--text-sec); }
+    .hall-chip.active {
+      border-color: var(--accent);
+      background: rgba(229,9,20,0.08);
+    }
+    .hall-chip.active i { color: var(--accent); }
+    .hall-chip.active .hall-name { color: var(--accent); }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .booking-page-body { grid-template-columns: 1fr; }
+      .summary-sticky { position: static; }
+    }
+    @media (max-width: 600px) {
+      .seat { width: 24px; height: 22px; font-size: 7px; }
+      .s-seats { gap: 3px; }
+      .s-aisle { width: 14px; }
+    }
+
+    /* ── Print styles for e-ticket ─────────────────────────────── */
+    @media print {
+      body > *:not(.modal-overlay) { display: none !important; }
+      .modal-overlay {
+        position: static !important;
+        opacity: 1 !important;
+        pointer-events: all !important;
+        background: white !important;
+        padding: 0 !important;
+      }
+      .eticket-wrap { transform: none !important; }
+      .eticket { box-shadow: none !important; border: 1px solid #ccc !important; }
+      .et-actions { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     NAVBAR
+═════════════════════════════════════════════════════════ -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <span class="logo-druk">DRUK</span><span class="logo-cinema">CINEMA</span>
+      </a>
+      <div class="navbar-links">
+        <a href="index.html">Home</a>
+        <a href="movies.html">Movies</a>
+        <a href="index.html#cinemas-section">Cinemas</a>
+        <a href="offers.html">Offers</a>
+        <a href="about.html">About</a>
+      </div>
+      <div class="navbar-actions">
+        <button class="nav-icon-btn" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
+        <a href="signin.html" class="nav-login-btn"><i class="fas fa-circle-user"></i> Sign In</a>
+        <a href="signin.html" class="nav-register-btn">Register</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="index.html">Home</a>
+      <a href="movies.html">Movies</a>
+      <a href="index.html#cinemas-section">Cinemas</a>
+      <a href="offers.html">Offers</a>
+      <a href="about.html">About</a>
+      <div class="mobile-menu-divider"></div>
+      <div class="mobile-menu-actions">
+        <a href="signin.html" class="m-login">Sign In</a>
+        <a href="signin.html" class="m-register">Register</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════
+     MOVIE HEADER STRIP
+═════════════════════════════════════════════════════════ -->
+<div class="movie-header-strip">
+  <div class="container">
+    <div class="movie-header-inner">
+      <img class="movie-poster-thumb" id="bookingPoster"
+        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop&q=80"
+        alt="Movie poster">
+      <div class="movie-header-meta">
+        <h1 id="bookingTitle">Lunana: A Yak in the Classroom</h1>
+        <div class="show-pills">
+          <div class="show-pill"><i class="fas fa-building"></i> <span id="hallPill">Thimphu City Cinema · Hall 1</span></div>
+          <div class="show-pill"><i class="fas fa-calendar"></i> <span id="headerDate">Sat, 24 May 2026</span></div>
+          <div class="show-pill"><i class="fas fa-clock"></i> <span id="headerTime">6:30 PM</span></div>
+          <div class="show-pill">
+            <i class="fas fa-star" style="color:var(--gold)"></i>
+            <span id="bookingRating" style="color:var(--gold);font-weight:700;">8.4</span>
+          </div>
+          <div class="show-pill"><i class="fas fa-film"></i> Digital · 2D</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress bar -->
+<div class="progress-bar-wrap">
+  <div class="container">
+    <div class="progress-steps">
+      <div class="pstep active">
+        <div class="pstep-num">1</div>
+        <span class="pstep-lbl">Select Seats</span>
+      </div>
+      <div class="pconn"></div>
+      <div class="pstep pend">
+        <div class="pstep-num">2</div>
+        <span class="pstep-lbl">Review</span>
+      </div>
+      <div class="pconn"></div>
+      <div class="pstep pend">
+        <div class="pstep-num">3</div>
+        <span class="pstep-lbl">Payment</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN BODY
+═════════════════════════════════════════════════════════ -->
+<main>
+  <div class="container">
+    <div class="booking-page-body">
+
+      <!-- ══ LEFT: Seat selection ════════════════════════ -->
+      <div class="seat-col">
+
+        <!-- Date selection -->
+        <div class="selector-group">
+          <p class="sel-label"><i class="fas fa-calendar-days"></i> Select Date</p>
+          <!-- Date chips are generated dynamically by the inline script below -->
+          <div class="date-scroller" id="dateScroller"></div>
+        </div>
+
+        <!-- Hall selection -->
+        <div class="selector-group">
+          <p class="sel-label"><i class="fas fa-building"></i> Select Hall</p>
+          <div class="hall-selector" id="hallSelector">
+            <button class="hall-chip active" data-hall="Hall 1">
+              <i class="fas fa-couch"></i>
+              <div>
+                <span class="hall-name">Hall 1</span>
+                <span class="hall-sub">Premium · 150 seats · Dolby</span>
+              </div>
+            </button>
+            <button class="hall-chip" data-hall="Hall 2">
+              <i class="fas fa-couch"></i>
+              <div>
+                <span class="hall-name">Hall 2</span>
+                <span class="hall-sub">Standard · 120 seats · Digital</span>
+              </div>
+            </button>
+            <button class="hall-chip" data-hall="Hall 3">
+              <i class="fas fa-couch"></i>
+              <div>
+                <span class="hall-name">Hall 3</span>
+                <span class="hall-sub">Economy · 100 seats · Digital</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Showtime selection -->
+        <div class="selector-group">
+          <p class="sel-label"><i class="fas fa-clock"></i> Select Showtime</p>
+          <div class="time-scroller" id="timeScroller">
+            <button class="time-chip" data-time="10:00 AM">
+              <span class="avail-dot"></span> 10:00 AM
+            </button>
+            <button class="time-chip" data-time="1:30 PM">
+              <span class="avail-dot"></span> 1:30 PM
+            </button>
+            <button class="time-chip active" data-time="6:30 PM">
+              <span class="avail-dot"></span> 6:30 PM
+            </button>
+            <button class="time-chip full" data-time="9:15 PM">
+              <span class="avail-dot" style="background:var(--accent)"></span> 9:15 PM
+              <span style="font-size:9px;color:var(--accent);font-weight:700;">FAST FILLING</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Max seats warning -->
+        <div class="max-warn" id="maxWarn">
+          <i class="fas fa-triangle-exclamation"></i>
+          You can select up to 8 seats per booking.
+        </div>
+
+        <!-- ── SEAT MAP CARD ──────────────────────────── -->
+        <div class="seatmap-card">
+          <div class="seatmap-header">
+            <div class="seatmap-title">
+              <i class="fas fa-couch"></i> Choose Your Seats
+            </div>
+            <div class="seat-count-badge" id="seatCountBadge">0 / 8 selected</div>
+          </div>
+
+          <!-- Scrollable map area -->
+          <div class="seatmap-scroll">
+            <div class="seatmap-inner">
+
+              <!-- SCREEN -->
+              <div class="screen-zone">
+                <div class="screen-viz"></div>
+                <p class="screen-label-text">Screen</p>
+                <p class="screen-sublabel">All eyes this way</p>
+              </div>
+
+              <!-- Seat column numbers header (generated by JS) -->
+              <div id="seatNumHeader"></div>
+
+              <!-- Seat grid (generated by JS) -->
+              <div id="seatGrid"></div>
+
+            </div><!-- /seatmap-inner -->
+          </div><!-- /seatmap-scroll -->
+
+          <!-- Legend -->
+          <div class="legend-strip">
+            <div class="leg-item">
+              <div class="leg-swatch ls-recliner"></div>
+              <span>Recliner (Nu.500)</span>
+            </div>
+            <div class="leg-item">
+              <div class="leg-swatch ls-execgold"></div>
+              <span>Exec. Gold (Nu.300)</span>
+            </div>
+            <div class="leg-item">
+              <div class="leg-swatch ls-executive"></div>
+              <span>Executive (Nu.250)</span>
+            </div>
+            <div class="leg-item">
+              <div class="leg-swatch ls-classic"></div>
+              <span>Classic (Nu.150)</span>
+            </div>
+            <div class="leg-item">
+              <div class="leg-swatch ls-selected"></div>
+              <span>Selected</span>
+            </div>
+            <div class="leg-item">
+              <div class="leg-swatch ls-booked"></div>
+              <span>Booked</span>
+            </div>
+          </div>
+
+        </div><!-- /seatmap-card -->
+
+      </div><!-- /seat-col -->
+
+      <!-- ══ RIGHT: Summary ══════════════════════════════ -->
+      <div class="summary-sticky">
+        <div class="sum-card">
+
+          <!-- Header -->
+          <div class="sum-head">
+            <i class="fas fa-receipt"></i>
+            <h3>Booking Summary</h3>
+          </div>
+
+          <!-- Movie info -->
+          <div class="sum-movie">
+            <img id="summaryPoster"
+              src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop&q=80"
+              alt="poster">
+            <div class="sum-movie-info">
+              <h4 id="summaryTitle">Lunana: A Yak in the Classroom</h4>
+              <p><i class="fas fa-building"></i> Thimphu City Cinema</p>
+              <p><i class="fas fa-calendar"></i> <span id="summaryDate">—</span></p>
+              <p><i class="fas fa-clock"></i> <span id="summaryTime">6:30 PM</span></p>
+              <p><i class="fas fa-film"></i> <span id="summaryHall">Hall 1 · Digital · 2D</span></p>
+            </div>
+          </div>
+
+          <!-- Selected seats -->
+          <div class="sum-seats">
+            <p class="sum-seats-lbl">Selected Seats</p>
+            <div class="seats-tags" id="seatTagsDisplay">
+              <span class="no-sel">No seats selected yet</span>
+            </div>
+          </div>
+
+          <!-- Category breakdown -->
+          <div class="cat-breakdown">
+            <p class="cat-brkdwn-lbl">Price Breakdown</p>
+            <div id="catBreakdown">
+              <p class="brkdwn-empty">Select seats to see breakdown</p>
+            </div>
+          </div>
+
+          <!-- Totals -->
+          <div class="sum-pricing">
+            <div class="sum-row">
+              <span class="lbl">Subtotal</span>
+              <span class="val" id="subtotalEl">Nu. 0</span>
+            </div>
+            <div class="sum-row">
+              <span class="lbl">Convenience Fee</span>
+              <span class="val" id="convFeeEl">Nu. 0</span>
+            </div>
+            <div class="sum-row total-row">
+              <span class="lbl">Total</span>
+              <span class="val" id="totalEl">Nu. 0</span>
+            </div>
+          </div>
+
+          <!-- Action -->
+          <div class="sum-action">
+            <button class="book-btn" id="confirmBtn" disabled>
+              <i class="fas fa-lock"></i> Confirm &amp; Pay
+            </button>
+            <p class="book-note">
+              <i class="fas fa-shield-halved"></i>
+              100% secure · Instant e-ticket
+            </p>
+          </div>
+
+        </div><!-- /sum-card -->
+
+        <!-- Cancellation note -->
+        <div class="cancel-note">
+          <i class="fas fa-circle-info"></i>
+          Free cancellation up to 2 hrs before showtime. After that a 20% fee applies.
+        </div>
+
+      </div><!-- /summary-sticky -->
+
+    </div><!-- /booking-page-body -->
+  </div>
+</main>
+
+<!-- ════════════════════════════════════════════════════════
+     E-TICKET MODAL
+═════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="eticket-wrap">
+    <div class="eticket">
+
+      <!-- Header -->
+      <div class="et-header">
+        <div class="et-logo"><span class="dr">DRUK</span><span class="ck">CINEMA</span></div>
+        <button class="et-close-btn" id="etCloseX" aria-label="Close"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Confirmed banner -->
+      <div class="et-confirmed-banner">
+        <i class="fas fa-circle-check"></i>
+        Booking Confirmed — Your e-ticket is ready!
+      </div>
+
+      <!-- Movie details -->
+      <div class="et-top">
+        <div class="et-movie-row">
+          <img class="et-poster" id="etPoster" src="" alt="poster">
+          <div class="et-movie-details">
+            <p class="et-movie-title" id="etMovieTitle">—</p>
+            <div class="et-tags">
+              <span class="et-tag"><i class="fas fa-film"></i> Digital 2D</span>
+              <span class="et-tag" id="etLangTag">Dzongkha</span>
+            </div>
+            <div class="et-info-grid">
+              <div>
+                <p class="et-cell-lbl">Date</p>
+                <p class="et-cell-val" id="etDate">—</p>
+              </div>
+              <div>
+                <p class="et-cell-lbl">Time</p>
+                <p class="et-cell-val" id="etTime">—</p>
+              </div>
+              <div>
+                <p class="et-cell-lbl">Hall</p>
+                <p class="et-cell-val" id="etHall">—</p>
+              </div>
+              <div>
+                <p class="et-cell-lbl">Cinema</p>
+                <p class="et-cell-val">Thimphu City</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Selected seats -->
+        <div class="et-seats-row">
+          <p class="et-seats-label">Your Seats</p>
+          <div class="et-seat-chips" id="etSeatChips">—</div>
+        </div>
+      </div>
+
+      <!-- Tear line -->
+      <div class="et-tear"></div>
+
+      <!-- QR code + totals -->
+      <div class="et-bottom">
+        <div class="et-qr-col">
+          <div id="etQrBox"></div>
+          <p class="et-ref-code" id="etRefCode">DRK-000000</p>
+          <p class="et-qr-hint">Scan at entrance</p>
+        </div>
+        <div class="et-right-col">
+          <div class="et-price-row">
+            <span class="et-price-lbl">Total Paid</span>
+            <span class="et-price-val" id="etTotal">Nu. 0</span>
+          </div>
+          <div class="et-status-badge">
+            <i class="fas fa-shield-check"></i> Confirmed &amp; Paid
+          </div>
+          <p class="et-email-note">
+            <i class="fas fa-envelope"></i>
+            A copy of this ticket has been sent to your registered email address.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="et-actions">
+        <button class="et-btn et-btn-secondary" id="modalReset">
+          <i class="fas fa-rotate-left"></i> New Booking
+        </button>
+        <button class="et-btn et-btn-primary" id="etDownloadBtn">
+          <i class="fas fa-download"></i> Save Ticket
+        </button>
+        <button class="et-btn et-btn-secondary" id="modalClose">
+          <i class="fas fa-house"></i> Go Home
+        </button>
+      </div>
+
+    </div><!-- /eticket -->
+  </div><!-- /eticket-wrap -->
+</div><!-- /modal-overlay -->
+
+<!-- ════════════════════════════════════════════════════════
+     FOOTER
+═════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div>
+        <div class="footer-logo">
+          <span class="logo-druk">DRUK</span><span class="logo-cinema">CINEMA</span>
+        </div>
+        <p class="footer-desc">Bhutan's premier movie ticketing platform. Experience the magic of cinema in the Land of the Thunder Dragon.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" aria-label="X / Twitter"><i class="fab fa-x-twitter"></i></a>
+          <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="movies.html">Now Showing</a></li>
+          <li><a href="movies.html">Coming Soon</a></li>
+          <li><a href="movies.html">Top Rated</a></li>
+          <li><a href="movies.html">Bhutanese Films</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Cinemas</h4>
+        <ul>
+          <li><a href="#">Thimphu City Cinema</a></li>
+          <li><a href="#">Paro Multiplex</a></li>
+          <li><a href="#">Punakha Cinema</a></li>
+          <li><a href="#">Bumthang Theatre</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Booking Guide</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 DrukCinema</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <span class="footer-divider">|</span>
+        <a href="#">Terms</a>
+        <span class="footer-divider">|</span>
+        <span class="footer-made">Made in Bhutan 🐉</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/admin-bridge.js"></script>
+
+<!-- ════════════════════════════════════════════════════════
+     DYNAMIC DATE CHIPS
+     Runs after main.js + admin-bridge.js.
+     • If admin-bridge already populated #dateScroller (admin movie) → skips.
+     • Otherwise generates 7 date chips starting from today.
+═════════════════════════════════════════════════════════ -->
+<script>
+(function generateDynamicDateChips() {
+  'use strict';
+
+  var ds = document.getElementById('dateScroller');
+  if (!ds) return;
+  /* Admin-bridge already built the chips for this admin movie — bail out */
+  if (ds.children.length > 0) return;
+
+  var DAY   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var MON   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MFULL = [
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+  ];
+
+  /* Midnight today (local time) */
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  /* Build 7 date chips: today + 6 days */
+  for (var i = 0; i < 7; i++) {
+    var d   = new Date(today.getTime());
+    d.setDate(today.getDate() + i);
+
+    var dayName  = DAY[d.getDay()];
+    var dateNum  = d.getDate();
+    var monShort = MON[d.getMonth()];
+    var yr       = d.getFullYear();
+    /* Full readable date — e.g. "Sun, 25 May 2026" */
+    var fullDate = dayName + ', ' + dateNum + ' ' + MFULL[d.getMonth()] + ' ' + yr;
+    /* ISO date string for data attributes */
+    var isoDate  = d.toISOString().split('T')[0];
+
+    var btn = document.createElement('button');
+    btn.className        = 'date-chip' + (i === 0 ? ' active' : '');
+    btn.dataset.date     = isoDate;
+    btn.dataset.year     = String(yr);
+    btn.dataset.fullDate = fullDate;
+    btn.innerHTML =
+      '<span class="dc-day">' + dayName  + '</span>' +
+      '<span class="dc-num">' + dateNum  + '</span>' +
+      '<span class="dc-mon">' + monShort + '</span>';
+    ds.appendChild(btn);
+  }
+
+  /* ── Helper: sync header strip + summary panel ─────────── */
+  function syncDateDisplay(chip) {
+    var hd = document.getElementById('headerDate');
+    if (hd) hd.textContent = chip.dataset.fullDate;
+
+    var sd = document.getElementById('summaryDate');
+    if (sd) sd.textContent = chip.dataset.fullDate;
+  }
+
+  /* Set initial display from the first (active) chip */
+  var firstChip = ds.querySelector('.date-chip.active');
+  if (firstChip) syncDateDisplay(firstChip);
+
+  /* ── Click handler (bubbles up to scroller container) ─── */
+  /* main.js also listens via event delegation and resets the seat map;
+     this listener only needs to update the date labels. */
+  ds.addEventListener('click', function (e) {
+    var chip = e.target.closest('.date-chip');
+    if (!chip) return;
+    syncDateDisplay(chip);
+  });
+})();
+</script>
+</body>
+</html>

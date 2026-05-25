@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — DrukCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="login-logo-icon"><i class="fas fa-film"></i></div>
+      <span class="login-logo-name">DrukCinema</span>
+      <span class="login-logo-sub">Admin Panel</span>
+    </div>
+
+    <h2 class="login-heading">Sign in to continue</h2>
+    <p class="login-sub">Enter your admin credentials to access the panel.</p>
+
+    <!-- Error -->
+    <div class="login-error" id="loginError">
+      <i class="fas fa-exclamation-circle"></i>
+      <span id="loginErrorMsg">Invalid username or password.</span>
+    </div>
+
+    <!-- Form -->
+    <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          class="form-control"
+          placeholder="Enter username"
+          autocomplete="username"
+          autofocus
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">
+          Password
+          <button type="button" id="togglePwd"
+            onclick="togglePassword()"
+            style="float:right;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:inherit;padding:0;text-transform:none;letter-spacing:0">
+            <i class="fas fa-eye" id="toggleIcon"></i> Show
+          </button>
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          placeholder="Enter password"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <button type="submit" class="login-btn" id="loginBtn">
+        <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <!-- Hint -->
+    <div class="login-hint">
+      <i class="fas fa-circle-info" style="color:var(--text3);margin-right:4px"></i>
+      Contact your system administrator for login credentials.
+    </div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+  // If already logged in, go straight to dashboard
+  (function() {
+    const a = JSON.parse(localStorage.getItem('drk_admin_auth') || 'null');
+    if (a && a.loggedIn) window.location.href = 'dashboard.html';
+  })();
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    const err = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+
+    err.classList.remove('show');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
+    btn.disabled  = true;
+
+    setTimeout(() => {
+      if (adminLogin(u, p)) {
+        btn.innerHTML = '<i class="fas fa-check"></i> Success!';
+        btn.style.background = '#22c55e';
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
+      } else {
+        document.getElementById('loginErrorMsg').textContent =
+          'Invalid username or password. Please try again.';
+        err.classList.add('show');
+        btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+        btn.disabled  = false;
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    }, 500);
+  }
+
+  function togglePassword() {
+    const pwd  = document.getElementById('password');
+    const icon = document.getElementById('toggleIcon');
+    const btn  = document.getElementById('togglePwd');
+    if (pwd.type === 'password') {
+      pwd.type  = 'text';
+      icon.className = 'fas fa-eye-slash';
+      btn.innerHTML  = '<i class="fas fa-eye-slash" id="toggleIcon"></i> Hide';
+    } else {
+      pwd.type  = 'password';
+      icon.className = 'fas fa-eye';
+      btn.innerHTML  = '<i class="fas fa-eye" id="toggleIcon"></i> Show';
+    }
+  }
+
+  // Enter key on username field moves to password
+  document.getElementById('username').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('password').focus(); }
+  });
+</script>
+</body>
+</html>

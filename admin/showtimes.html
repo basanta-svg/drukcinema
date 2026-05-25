@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Showtimes — DrukCinema Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-film"></i></div>
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">DrukCinema</span>
+          <span class="sidebar-brand-sub">Admin Panel</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Management</div>
+      <a href="dashboard.html">                   <i class="fas fa-gauge-high"></i>   Dashboard</a>
+      <a href="movies.html">                       <i class="fas fa-film"></i>          Movies</a>
+      <a href="showtimes.html"  class="active">    <i class="fas fa-calendar-alt"></i> Showtimes</a>
+      <a href="bookings.html">                     <i class="fas fa-ticket"></i>        Bookings</a>
+      <div class="nav-section-label">Counter</div>
+      <a href="offline-booking.html">              <i class="fas fa-cash-register"></i> Offline Booking</a>
+      <a href="print-ticket.html">                 <i class="fas fa-print"></i>          Print Tickets</a>
+      <a href="#" class="nav-logout" onclick="adminLogout()"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+    </nav>
+    <div class="sidebar-footer">DrukCinema Admin v1.0<br>© 2026 All rights reserved</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="topbar-left">
+          <h2>Showtimes</h2>
+          <p>Schedule and manage screening sessions</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="topbar-avatar"><i class="fas fa-user"></i></div>
+          <div class="topbar-user-info">
+            <span class="topbar-username" id="topbarUser"></span>
+            <span class="topbar-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-body">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Showtime Scheduler</h1>
+          <p id="showCount">Loading…</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleForm()">
+          <i class="fas fa-plus" id="formToggleIcon"></i>
+          <span id="formToggleLabel">Add Showtime</span>
+        </button>
+      </div>
+
+      <!-- ── Inline Form ──────────────────────────────── -->
+      <div class="form-panel" id="showtimeForm">
+        <div class="form-panel-header">
+          <div class="form-panel-title">
+            <i class="fas fa-calendar-plus"></i>
+            <span id="formTitle">Add New Showtime</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="resetForm()">
+            <i class="fas fa-xmark"></i> Cancel
+          </button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Movie *</label>
+            <select id="fMovie" class="form-control">
+              <option value="">— Select Movie —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" id="fDate" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Time *</label>
+            <input type="time" id="fTime" class="form-control" value="14:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hall Number *</label>
+            <select id="fHall" class="form-control">
+              <option value="1">Hall 1 (80 seats)</option>
+              <option value="2">Hall 2 (100 seats)</option>
+              <option value="3">Hall 3 (60 seats)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ticket Price (Nu.)</label>
+            <input type="number" id="fPrice" class="form-control" value="150" min="50" step="10">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Total Seats</label>
+          <input type="number" id="fSeats" class="form-control" value="80" min="10" max="500"
+            style="max-width:160px"
+            placeholder="80">
+          <div style="font-size:11.5px;color:var(--text3);margin-top:5px">
+            <i class="fas fa-info-circle" style="color:var(--gold)"></i>
+            Hall 1 = 80 · Hall 2 = 100 · Hall 3 = 60 (auto-filled when you change hall)
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-outline" onclick="resetForm()">
+            <i class="fas fa-xmark"></i> Cancel
+          </button>
+          <button class="btn btn-primary" onclick="saveShowtime()">
+            <i class="fas fa-floppy-disk"></i> <span id="saveBtnLabel">Save Showtime</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Filters ──────────────────────────────────── -->
+      <div class="filters-bar">
+        <span class="filter-label">Filter:</span>
+        <select id="filterMovie" class="filter-control" onchange="renderTable()">
+          <option value="">All Movies</option>
+        </select>
+        <input type="date" id="filterDate" class="filter-control" onchange="renderTable()" title="Filter by date">
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">
+          <i class="fas fa-xmark"></i> Clear
+        </button>
+        <span style="margin-left:auto;font-size:12px;color:var(--text3)" id="filteredCount"></span>
+      </div>
+
+      <!-- ── Table ───────────────────────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-calendar-alt"></i> All Showtimes</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Movie</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Hall</th>
+                <th>Total</th>
+                <th>Booked</th>
+                <th>Available</th>
+                <th>Price</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="showtimesTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+  checkAuth();
+  document.getElementById('topbarUser').textContent = getLoggedInUser();
+
+  const HALL_SEATS = { '1': 80, '2': 100, '3': 60 };
+  let editingId = null;
+
+  // Auto-fill seats when hall changes
+  document.getElementById('fHall').addEventListener('change', function() {
+    document.getElementById('fSeats').value = HALL_SEATS[this.value] || 80;
+  });
+
+  // Set today as default date
+  document.getElementById('fDate').value = todayStr();
+
+  function populateMovieDropdowns() {
+    const movies  = getMovies();
+    const formSel = document.getElementById('fMovie');
+    const filSel  = document.getElementById('filterMovie');
+    const opts    = movies.map(m =>
+      `<option value="${m.id}">${esc(m.title)}</option>`
+    ).join('');
+    formSel.innerHTML = '<option value="">— Select Movie —</option>' + opts;
+    filSel.innerHTML  = '<option value="">All Movies</option>' + opts;
+  }
+
+  function toggleForm() {
+    const panel = document.getElementById('showtimeForm');
+    if (panel.classList.contains('open')) { resetForm(); }
+    else {
+      editingId = null;
+      document.getElementById('formTitle').textContent      = 'Add New Showtime';
+      document.getElementById('saveBtnLabel').textContent   = 'Save Showtime';
+      document.getElementById('formToggleLabel').textContent = 'Cancel';
+      document.getElementById('formToggleIcon').className   = 'fas fa-xmark';
+      panel.classList.add('open');
+      panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+  }
+
+  function resetForm() {
+    editingId = null;
+    document.getElementById('showtimeForm').classList.remove('open');
+    document.getElementById('formToggleLabel').textContent = 'Add Showtime';
+    document.getElementById('formToggleIcon').className    = 'fas fa-plus';
+    document.getElementById('fMovie').value  = '';
+    document.getElementById('fDate').value   = todayStr();
+    document.getElementById('fTime').value   = '14:00';
+    document.getElementById('fHall').value   = '1';
+    document.getElementById('fSeats').value  = '80';
+    document.getElementById('fPrice').value  = '150';
+  }
+
+  function editShowtime(id) {
+    const s = getShowtimes().find(x => x.id === id);
+    if (!s) return;
+    editingId = id;
+
+    document.getElementById('fMovie').value = s.movieId || '';
+    document.getElementById('fDate').value  = s.date    || todayStr();
+    document.getElementById('fTime').value  = s.time    || '14:00';
+    document.getElementById('fHall').value  = s.hall    || '1';
+    document.getElementById('fSeats').value = s.totalSeats || 80;
+    document.getElementById('fPrice').value = s.price   || 150;
+
+    document.getElementById('formTitle').textContent     = 'Edit Showtime';
+    document.getElementById('saveBtnLabel').textContent  = 'Update Showtime';
+    document.getElementById('formToggleLabel').textContent = 'Cancel';
+    document.getElementById('formToggleIcon').className  = 'fas fa-xmark';
+    document.getElementById('showtimeForm').classList.add('open');
+    document.getElementById('showtimeForm').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function saveShowtime() {
+    const movieId = document.getElementById('fMovie').value;
+    const date    = document.getElementById('fDate').value;
+    const time    = document.getElementById('fTime').value;
+    const hall    = document.getElementById('fHall').value;
+
+    if (!movieId) { showToast('Please select a movie.', 'error');  return; }
+    if (!date)    { showToast('Please pick a date.', 'error');      return; }
+    if (!time)    { showToast('Please set a time.', 'error');       return; }
+
+    const movies  = getMovies();
+    const movie   = movies.find(m => m.id === movieId);
+
+    const showtime = {
+      id:          editingId || uid('s'),
+      movieId,
+      movieTitle:  movie ? movie.title : '',
+      date,
+      time,
+      hall,
+      totalSeats:  parseInt(document.getElementById('fSeats').value) || HALL_SEATS[hall] || 80,
+      bookedSeats: editingId ? (getShowtimes().find(s=>s.id===editingId)?.bookedSeats||[]) : [],
+      price:       parseInt(document.getElementById('fPrice').value) || 150,
+    };
+
+    const showtimes = getShowtimes();
+    if (editingId) {
+      const idx = showtimes.findIndex(s => s.id === editingId);
+      if (idx >= 0) showtimes[idx] = showtime;
+      showToast('Showtime updated!');
+    } else {
+      showtimes.push(showtime);
+      showToast('Showtime added!');
+    }
+    saveShowtimes(showtimes);
+    resetForm();
+    renderTable();
+    updateCount();
+  }
+
+  function deleteShowtime(id) {
+    if (!confirm('Delete this showtime? Bookings for it will remain in the system.')) return;
+    saveShowtimes(getShowtimes().filter(s => s.id !== id));
+    renderTable();
+    updateCount();
+    showToast('Showtime deleted.', 'info');
+  }
+
+  function clearFilters() {
+    document.getElementById('filterMovie').value = '';
+    document.getElementById('filterDate').value  = '';
+    renderTable();
+  }
+
+  function renderTable() {
+    const fMovie = document.getElementById('filterMovie').value;
+    const fDate  = document.getElementById('filterDate').value;
+    const movies = getMovies();
+
+    let rows = getShowtimes();
+    if (fMovie) rows = rows.filter(s => s.movieId === fMovie);
+    if (fDate)  rows = rows.filter(s => s.date === fDate);
+
+    // Sort: date then time
+    rows = [...rows].sort((a, b) => {
+      const d = a.date.localeCompare(b.date);
+      return d !== 0 ? d : a.time.localeCompare(b.time);
+    });
+
+    document.getElementById('filteredCount').textContent =
+      rows.length + ' showtime' + (rows.length !== 1 ? 's' : '');
+
+    const tbody = document.getElementById('showtimesTbody');
+    const today = todayStr();
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="table-empty"><i class="fas fa-calendar"></i>No showtimes found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(s => {
+      const movie   = movies.find(m => m.id === s.movieId) || {};
+      const booked  = s.bookedSeats ? s.bookedSeats.length : 0;
+      const avail   = s.totalSeats - booked;
+      const isToday = s.date === today;
+      const isPast  = s.date < today;
+      return `
+        <tr>
+          <td>
+            <div class="td-bold">${esc(movie.title || s.movieTitle || 'Unknown')}</div>
+            <div style="font-size:11px;color:var(--text3)">${esc(movie.genre||'')}</div>
+          </td>
+          <td>
+            ${formatDate(s.date)}
+            ${isToday ? '<span class="badge badge-info" style="margin-left:5px;font-size:9.5px">Today</span>' : ''}
+            ${isPast  ? '<span class="badge badge-secondary" style="margin-left:5px;font-size:9.5px">Past</span>' : ''}
+          </td>
+          <td><strong style="color:var(--text1)">${s.time}</strong></td>
+          <td>Hall ${s.hall}</td>
+          <td>${s.totalSeats}</td>
+          <td style="color:${booked>0?'var(--accent)':'var(--text3)'};font-weight:${booked>0?700:400}">${booked}</td>
+          <td style="color:${avail>10?'#22c55e':avail>0?'var(--gold)':'var(--accent)'};font-weight:600">${avail}</td>
+          <td style="color:var(--gold);font-weight:600">Nu. ${s.price||150}</td>
+          <td style="text-align:right">
+            <div style="display:flex;gap:6px;justify-content:flex-end">
+              <button class="btn btn-warning btn-icon btn-sm" onclick="editShowtime('${s.id}')" title="Edit">
+                <i class="fas fa-pen"></i>
+              </button>
+              <button class="btn btn-danger btn-icon btn-sm" onclick="deleteShowtime('${s.id}')" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function updateCount() {
+    const all    = getShowtimes();
+    const today  = all.filter(s => s.date === todayStr()).length;
+    document.getElementById('showCount').textContent =
+      `${all.length} total · ${today} today`;
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  // Init
+  populateMovieDropdowns();
+  renderTable();
+  updateCount();
+</script>
+</body>
+</html>

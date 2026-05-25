@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — DrukCinema</title>
+  <meta name="description" content="Learn about DrukCinema — Bhutan's premier movie booking platform, our mission, cinema locations, team, and how to get in touch.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles/main.css">
+
+  <style>
+    body { background: var(--bg-primary); }
+
+    /* ── Page Hero ───────────────────────────────────── */
+    .about-hero {
+      background: linear-gradient(135deg, #0a0a0a 0%, #141414 60%, #0d0d0d 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 120px 0 64px;
+      position: relative; overflow: hidden;
+    }
+    .about-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=600&fit=crop&q=40')
+        center/cover no-repeat;
+      opacity: 0.04;
+    }
+    .about-hero-inner { position: relative; z-index: 1; max-width: 640px; }
+    .about-hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.25);
+      color: var(--accent); padding: 5px 14px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; margin-bottom: 18px;
+    }
+    .about-hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 900; color: white; line-height: 1.1; margin-bottom: 16px;
+    }
+    .about-hero h1 span { color: var(--accent); }
+    .about-hero p {
+      font-size: 15px; color: var(--text-sec); line-height: 1.75; margin-bottom: 28px;
+    }
+    .hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* ── Stats bar ───────────────────────────────────── */
+    .about-stats-bar {
+      background: #111; border-bottom: 1px solid var(--border);
+      padding: 28px 0;
+    }
+    .about-stats-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 0;
+    }
+    .about-stat {
+      text-align: center; padding: 0 20px;
+      border-right: 1px solid var(--border);
+    }
+    .about-stat:last-child { border-right: none; }
+    .about-stat .as-val {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2rem; font-weight: 900; color: white;
+      line-height: 1; margin-bottom: 6px;
+    }
+    .about-stat .as-val span { color: var(--accent); }
+    .about-stat .as-lbl { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Section layout ──────────────────────────────── */
+    .about-section { padding: 72px 0; }
+    .about-section + .about-section { border-top: 1px solid var(--border); }
+    .about-section-alt { background: #111; }
+
+    .as-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .as-grid-2.reverse { direction: rtl; }
+    .as-grid-2.reverse > * { direction: ltr; }
+
+    .as-eyebrow {
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--accent); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .as-eyebrow::before {
+      content: ''; width: 24px; height: 2px; background: var(--accent); border-radius: 2px;
+    }
+    .as-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 800; color: white; line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .as-body {
+      font-size: 14px; color: var(--text-sec); line-height: 1.8; margin-bottom: 20px;
+    }
+    .as-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .as-list-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text-sec);
+    }
+    .as-list-item i { color: var(--accent); flex-shrink: 0; margin-top: 3px; font-size: 13px; }
+
+    /* Visual card / mockup */
+    .as-visual {
+      background: linear-gradient(135deg, #1a1a1a, #141414);
+      border: 1px solid var(--border); border-radius: 20px;
+      overflow: hidden; min-height: 320px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 80px; position: relative;
+    }
+    .as-visual-img {
+      width: 100%; height: 340px; object-fit: cover; display: block;
+    }
+    .as-visual-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    }
+    .as-visual-label {
+      position: absolute; bottom: 20px; left: 20px;
+      font-size: 13px; font-weight: 700; color: white;
+    }
+
+    /* ── Values/Cards grid ───────────────────────────── */
+    .values-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .value-card {
+      background: #181818; border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px 24px;
+      transition: all 0.25s;
+    }
+    .value-card:hover { transform: translateY(-4px); border-color: rgba(229,9,20,0.3); }
+    .value-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 16px;
+    }
+    .vi-red    { background: rgba(229,9,20,0.1);  }
+    .vi-gold   { background: rgba(245,197,24,0.1); }
+    .vi-green  { background: rgba(74,222,128,0.1); }
+    .vi-blue   { background: rgba(96,165,250,0.1); }
+    .vi-purple { background: rgba(168,85,247,0.1); }
+    .vi-teal   { background: rgba(0,180,216,0.1);  }
+    .value-card h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px; font-weight: 800; color: white; margin-bottom: 8px;
+    }
+    .value-card p { font-size: 13px; color: var(--text-sec); line-height: 1.65; }
+
+    /* ── Cinema locations ────────────────────────────── */
+    .cinemas-about-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 18px; }
+    .cinema-about-card {
+      background: #181818; border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; transition: all 0.25s;
+    }
+    .cinema-about-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); }
+    .cab-img { width: 100%; height: 140px; object-fit: cover; }
+    .cab-body { padding: 16px 18px; }
+    .cab-city {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px;
+    }
+    .cab-name {
+      font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 800;
+      color: white; margin-bottom: 8px;
+    }
+    .cab-detail {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .cab-detail i { font-size: 10px; color: var(--accent); }
+    .cab-status {
+      margin-top: 10px; display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    }
+    .cs-open { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .cs-coming { background: rgba(245,197,24,0.12); color: #fbbf24; }
+
+    /* ── FAQ ──────────────────────────────────────────── */
+    .faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 760px; }
+    .faq-item {
+      background: #181818; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; transition: border-color 0.2s;
+    }
+    .faq-item.open { border-color: rgba(229,9,20,0.3); }
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; cursor: pointer;
+      font-size: 14px; font-weight: 700; color: white;
+      gap: 12px;
+    }
+    .faq-question .faq-q-text { flex: 1; }
+    .faq-chevron {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 12px; flex-shrink: 0;
+      transition: all 0.25s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--accent); border-color: rgba(229,9,20,0.3); }
+    .faq-answer {
+      display: none; padding: 0 20px 18px;
+      font-size: 13px; color: var(--text-sec); line-height: 1.75;
+    }
+    .faq-item.open .faq-answer { display: block; }
+
+    /* ── Team ──────────────────────────────────────────── */
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 20px; }
+    .team-card {
+      background: #181818; border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 20px; text-align: center;
+      transition: all 0.25s;
+    }
+    .team-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); }
+    .team-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 900; margin: 0 auto 14px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .ta-red    { background: rgba(229,9,20,0.15);  color: var(--accent);  border: 2px solid rgba(229,9,20,0.3); }
+    .ta-blue   { background: rgba(96,165,250,0.15); color: #60a5fa; border: 2px solid rgba(96,165,250,0.3); }
+    .ta-green  { background: rgba(74,222,128,0.15); color: #4ade80; border: 2px solid rgba(74,222,128,0.3); }
+    .ta-gold   { background: rgba(245,197,24,0.15); color: #F5C518; border: 2px solid rgba(245,197,24,0.3); }
+    .ta-purple { background: rgba(168,85,247,0.15); color: #a855f7; border: 2px solid rgba(168,85,247,0.3); }
+    .ta-teal   { background: rgba(0,180,216,0.15);  color: #00b4d8; border: 2px solid rgba(0,180,216,0.3); }
+    .team-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px; font-weight: 800; color: white; margin-bottom: 4px;
+    }
+    .team-role { font-size: 11px; color: var(--text-muted); }
+    .team-flag { font-size: 18px; margin-top: 10px; }
+
+    /* ── Contact form ─────────────────────────────────── */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 48px; }
+    .contact-info-card {
+      background: #181818; border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
+    }
+    .contact-info-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 0; border-bottom: 1px solid var(--border);
+    }
+    .contact-info-item:last-child { border-bottom: none; }
+    .ci-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .cii-red   { background: rgba(229,9,20,0.1);  color: var(--accent); }
+    .cii-blue  { background: rgba(96,165,250,0.1); color: #60a5fa; }
+    .cii-green { background: rgba(74,222,128,0.1); color: #4ade80; }
+    .cii-gold  { background: rgba(245,197,24,0.1); color: #F5C518; }
+    .ci-label  { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .ci-val    { font-size: 14px; color: white; font-weight: 600; }
+
+    .contact-form-card {
+      background: #181818; border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
+    }
+    .cf-group { margin-bottom: 16px; }
+    .cf-label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--text-sec); margin-bottom: 7px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .cf-input, .cf-select, .cf-textarea {
+      width: 100%; padding: 12px 16px;
+      background: #111; border: 1px solid var(--border);
+      border-radius: 10px; color: white;
+      font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .cf-input:focus, .cf-select:focus, .cf-textarea:focus { border-color: rgba(229,9,20,0.55); }
+    .cf-input::placeholder, .cf-textarea::placeholder { color: var(--text-muted); }
+    .cf-textarea { min-height: 110px; resize: vertical; }
+    .cf-select option { background: #1e1e1e; }
+    .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cf-submit {
+      width: 100%; padding: 14px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 10px;
+      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .cf-submit:hover { background: var(--accent-hover); box-shadow: 0 6px 24px var(--shadow-red); transform: translateY(-1px); }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 960px) {
+      .as-grid-2 { grid-template-columns: 1fr; gap: 32px; }
+      .as-grid-2.reverse { direction: ltr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .values-grid  { grid-template-columns: 1fr 1fr; }
+      .about-stats-grid { grid-template-columns: repeat(2,1fr); gap: 20px; }
+      .about-stat { border-right: none; }
+    }
+    @media (max-width: 640px) {
+      .about-hero { padding: 90px 0 40px; }
+      .about-hero h1 { font-size: 2rem; }
+      .hero-cta-row { flex-direction: column; }
+      .hero-cta-row .btn { width: 100%; justify-content: center; }
+      .values-grid  { grid-template-columns: 1fr; }
+      .team-grid    { grid-template-columns: repeat(2,1fr); }
+      .cf-row       { grid-template-columns: 1fr; }
+      .cinemas-about-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .cinemas-about-grid { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <span class="logo-druk">DRUK</span><span class="logo-cinema">CINEMA</span>
+      </a>
+      <div class="navbar-links">
+        <a href="index.html">Home</a>
+        <a href="movies.html">Movies</a>
+        <a href="index.html#cinemas-section">Cinemas</a>
+        <a href="offers.html">Offers</a>
+        <a href="about.html" class="active">About</a>
+      </div>
+      <div class="navbar-actions">
+        <button class="nav-icon-btn" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
+        <a href="signin.html" class="nav-login-btn"><i class="fas fa-circle-user"></i> Sign In</a>
+        <a href="signin.html" class="nav-register-btn">Register</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="index.html">Home</a>
+      <a href="movies.html">Movies</a>
+      <a href="offers.html">Offers</a>
+      <a href="about.html">About</a>
+      <div class="mobile-menu-divider"></div>
+      <div class="mobile-menu-actions">
+        <a href="signin.html" class="m-login">Sign In</a>
+        <a href="signin.html" class="m-register">Register</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="about-hero">
+  <div class="container">
+    <div class="about-hero-inner">
+      <div class="about-hero-badge"><i class="fas fa-dragon"></i> Our Story</div>
+      <h1>Cinema for<br><span>Every Bhutanese</span></h1>
+      <p>DrukCinema was born from a passion for storytelling and a dream to make world-class cinema accessible to every corner of the Land of the Thunder Dragon. From Thimphu to Bumthang, we bring stories to life.</p>
+      <div class="hero-cta-row">
+        <a href="movies.html" class="btn btn-primary"><i class="fas fa-ticket"></i> Book a Movie</a>
+        <a href="#contact" class="btn btn-secondary"><i class="fas fa-envelope"></i> Contact Us</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="about-stats-bar">
+  <div class="container">
+    <div class="about-stats-grid">
+      <div class="about-stat">
+        <div class="as-val">4<span>+</span></div>
+        <div class="as-lbl">Cinema Locations</div>
+      </div>
+      <div class="about-stat">
+        <div class="as-val">12<span>+</span></div>
+        <div class="as-lbl">Movies Now Showing</div>
+      </div>
+      <div class="about-stat">
+        <div class="as-val">50K<span>+</span></div>
+        <div class="as-lbl">Tickets Booked</div>
+      </div>
+      <div class="about-stat">
+        <div class="as-val">4.8<span>★</span></div>
+        <div class="as-lbl">Average Rating</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSION -->
+<section class="about-section">
+  <div class="container">
+    <div class="as-grid-2">
+      <div>
+        <p class="as-eyebrow">Our Mission</p>
+        <h2 class="as-title">Making World-Class Cinema Accessible to All</h2>
+        <p class="as-body">DrukCinema was founded in 2024 with a single belief: every Bhutanese citizen deserves a world-class cinema experience — from the bustling capital of Thimphu to the serene valleys of Bumthang.</p>
+        <p class="as-body">We combine Bhutan's rich cultural heritage with modern technology — integrating Bhutan NDI authentication, mobile-first booking, and locally-sourced film content — to build a platform that reflects the spirit of the Dragon Kingdom.</p>
+        <div class="as-list">
+          <div class="as-list-item"><i class="fas fa-check-circle"></i> Instant e-ticket delivery with QR scan entry</div>
+          <div class="as-list-item"><i class="fas fa-check-circle"></i> Bhutan NDI integration for secure identity verification</div>
+          <div class="as-list-item"><i class="fas fa-check-circle"></i> Curated Bhutanese &amp; international film catalogue</div>
+          <div class="as-list-item"><i class="fas fa-check-circle"></i> Real-time seat selection across all halls</div>
+        </div>
+      </div>
+      <div class="as-visual">
+        <img class="as-visual-img"
+          src="https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=600&h=400&fit=crop&q=80"
+          alt="Cinema experience">
+        <div class="as-visual-overlay"></div>
+        <div class="as-visual-label">🐉 Made in Bhutan</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="about-section about-section-alt">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:40px;">
+      <p class="as-eyebrow" style="justify-content:center;">What We Stand For</p>
+      <h2 class="as-title" style="max-width:500px;margin:0 auto;">Our Core Values</h2>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon vi-red"><i class="fas fa-heart" style="color:var(--accent)"></i></div>
+        <h3>Accessibility</h3>
+        <p>Cinema should be for everyone. We provide affordable tickets, easy online booking, and multiple payment options including Bhutan NDI.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon vi-gold"><i class="fas fa-dragon" style="color:#F5C518"></i></div>
+        <h3>Cultural Pride</h3>
+        <p>We champion Bhutanese storytelling — from Dzongkha-language films to documentaries celebrating the kingdom's unique Gross National Happiness philosophy.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon vi-green"><i class="fas fa-leaf" style="color:#4ade80"></i></div>
+        <h3>Sustainability</h3>
+        <p>100% digital e-tickets reduce paper waste. Our infrastructure runs on renewable energy in partnership with Bhutan's green energy grid.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon vi-blue"><i class="fas fa-shield-halved" style="color:#60a5fa"></i></div>
+        <h3>Security &amp; Privacy</h3>
+        <p>Integrated with Bhutan's National Digital Identity (NDI) system, we ensure the highest standards of data security and user privacy.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon vi-purple"><i class="fas fa-star" style="color:#a855f7"></i></div>
+        <h3>Excellence</h3>
+        <p>From premium Recliner seats to crystal-clear Dolby sound systems, we partner only with cinemas that meet our quality standards.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon vi-teal"><i class="fas fa-users" style="color:#00b4d8"></i></div>
+        <h3>Community</h3>
+        <p>Cinema is a shared experience. We host community screenings, student programs, and partner with local film societies to grow Bhutan's film culture.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CINEMA LOCATIONS -->
+<section class="about-section">
+  <div class="container">
+    <div style="margin-bottom:36px;">
+      <p class="as-eyebrow">Where We Are</p>
+      <h2 class="as-title">Our Cinema Locations</h2>
+      <p style="font-size:14px;color:var(--text-sec);max-width:480px;line-height:1.7;">From the capital to the countryside — DrukCinema is bringing the silver screen to every major dzongkhag in Bhutan.</p>
+    </div>
+    <div class="cinemas-about-grid">
+
+      <div class="cinema-about-card">
+        <img class="cab-img"
+          src="https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=400&h=200&fit=crop&q=70"
+          alt="Thimphu City Cinema">
+        <div class="cab-body">
+          <p class="cab-city">Thimphu</p>
+          <p class="cab-name">Thimphu City Cinema</p>
+          <p class="cab-detail"><i class="fas fa-couch"></i> 3 halls · 420 seats</p>
+          <p class="cab-detail"><i class="fas fa-film"></i> Dolby Atmos · 4K Laser</p>
+          <p class="cab-detail"><i class="fas fa-clock"></i> 10:00 AM – 11:00 PM daily</p>
+          <span class="cab-status cs-open"><i class="fas fa-circle" style="font-size:7px;"></i> Open Now</span>
+        </div>
+      </div>
+
+      <div class="cinema-about-card">
+        <img class="cab-img"
+          src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=200&fit=crop&q=70"
+          alt="Paro Multiplex">
+        <div class="cab-body">
+          <p class="cab-city">Paro</p>
+          <p class="cab-name">Paro Valley Multiplex</p>
+          <p class="cab-detail"><i class="fas fa-couch"></i> 2 halls · 280 seats</p>
+          <p class="cab-detail"><i class="fas fa-film"></i> Digital · Dolby Digital</p>
+          <p class="cab-detail"><i class="fas fa-clock"></i> 11:00 AM – 10:00 PM daily</p>
+          <span class="cab-status cs-open"><i class="fas fa-circle" style="font-size:7px;"></i> Open Now</span>
+        </div>
+      </div>
+
+      <div class="cinema-about-card">
+        <img class="cab-img"
+          src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&h=200&fit=crop&q=70"
+          alt="Punakha Cinema">
+        <div class="cab-body">
+          <p class="cab-city">Punakha</p>
+          <p class="cab-name">Punakha Cinema Hall</p>
+          <p class="cab-detail"><i class="fas fa-couch"></i> 1 hall · 150 seats</p>
+          <p class="cab-detail"><i class="fas fa-film"></i> Digital · Standard</p>
+          <p class="cab-detail"><i class="fas fa-clock"></i> 2:00 PM – 9:00 PM (weekdays)</p>
+          <span class="cab-status cs-open"><i class="fas fa-circle" style="font-size:7px;"></i> Open Now</span>
+        </div>
+      </div>
+
+      <div class="cinema-about-card">
+        <img class="cab-img"
+          src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?w=400&h=200&fit=crop&q=70"
+          alt="Bumthang Theatre">
+        <div class="cab-body">
+          <p class="cab-city">Bumthang</p>
+          <p class="cab-name">Bumthang Mountain Theatre</p>
+          <p class="cab-detail"><i class="fas fa-couch"></i> 1 hall · 120 seats</p>
+          <p class="cab-detail"><i class="fas fa-film"></i> Digital · Standard</p>
+          <p class="cab-detail"><i class="fas fa-clock"></i> Weekends &amp; holidays</p>
+          <span class="cab-status cs-open"><i class="fas fa-circle" style="font-size:7px;"></i> Open Now</span>
+        </div>
+      </div>
+
+      <div class="cinema-about-card" style="border-style:dashed;opacity:0.65;">
+        <div class="cab-img" style="background:linear-gradient(135deg,#111,#1a1a1a);display:flex;align-items:center;justify-content:center;font-size:40px;">🏗️</div>
+        <div class="cab-body">
+          <p class="cab-city">Wangdue Phodrang</p>
+          <p class="cab-name">Wangdue Cineplex <span style="font-size:10px;color:var(--text-muted);">(Upcoming)</span></p>
+          <p class="cab-detail"><i class="fas fa-couch"></i> 2 halls · 320 seats planned</p>
+          <p class="cab-detail"><i class="fas fa-film"></i> IMAX &amp; Dolby Atmos</p>
+          <p class="cab-detail"><i class="fas fa-calendar"></i> Opening Q4 2026</p>
+          <span class="cab-status cs-coming">⏳ Coming Soon</span>
+        </div>
+      </div>
+
+      <div class="cinema-about-card" style="border-style:dashed;opacity:0.65;">
+        <div class="cab-img" style="background:linear-gradient(135deg,#111,#1a1a1a);display:flex;align-items:center;justify-content:center;font-size:40px;">🏗️</div>
+        <div class="cab-body">
+          <p class="cab-city">Trongsa</p>
+          <p class="cab-name">Trongsa Heritage Cinema <span style="font-size:10px;color:var(--text-muted);">(Upcoming)</span></p>
+          <p class="cab-detail"><i class="fas fa-couch"></i> 1 hall · 200 seats planned</p>
+          <p class="cab-detail"><i class="fas fa-film"></i> Digital · Heritage design</p>
+          <p class="cab-detail"><i class="fas fa-calendar"></i> Opening 2027</p>
+          <span class="cab-status cs-coming">⏳ Coming Soon</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="about-section about-section-alt">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:36px;">
+      <p class="as-eyebrow" style="justify-content:center;">The People</p>
+      <h2 class="as-title">Meet Our Team</h2>
+      <p style="font-size:14px;color:var(--text-sec);max-width:440px;margin:8px auto 0;line-height:1.7;">A small but passionate team of Bhutanese tech enthusiasts, film lovers, and entrepreneurs.</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar ta-red">KD</div>
+        <p class="team-name">Karma Dorji</p>
+        <p class="team-role">Founder &amp; CEO</p>
+        <div class="team-flag">🐉</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar ta-blue">TW</div>
+        <p class="team-name">Tashi Wangchuk</p>
+        <p class="team-role">CTO &amp; Lead Dev</p>
+        <div class="team-flag">🇧🇹</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar ta-green">PY</div>
+        <p class="team-name">Pema Yangchen</p>
+        <p class="team-role">Head of Design</p>
+        <div class="team-flag">🎨</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar ta-gold">SD</div>
+        <p class="team-name">Sonam Dema</p>
+        <p class="team-role">Cinema Operations</p>
+        <div class="team-flag">🎬</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar ta-purple">RG</div>
+        <p class="team-name">Rinchen Gyaltshen</p>
+        <p class="team-role">Marketing Lead</p>
+        <div class="team-flag">📣</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar ta-teal">DL</div>
+        <p class="team-name">Deki Lhamo</p>
+        <p class="team-role">Customer Success</p>
+        <div class="team-flag">💛</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="about-section" id="faq">
+  <div class="container">
+    <div style="margin-bottom:36px;">
+      <p class="as-eyebrow">Got Questions?</p>
+      <h2 class="as-title">Frequently Asked Questions</h2>
+    </div>
+    <div class="faq-list" id="faqList">
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">How do I book a ticket on DrukCinema?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          Browse movies on our homepage or the Movies page, click "Book Now" on any showing, select your preferred date, hall, showtime and seats, then confirm your booking. You'll receive an instant e-ticket with a QR code — no printing needed!
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">What is Bhutan NDI login and how does it work?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          Bhutan NDI (National Digital Identity) is the government-issued digital identity system by DITT. You can use your NDI credentials to sign in or register on DrukCinema with biometric verification — no passwords needed. It's faster, safer, and fully verified.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">Can I cancel or change my booking?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          Yes. Go to My Profile → My Bookings and click "Cancel" on any confirmed booking. Free cancellation is available up to 2 hours before showtime. A 20% fee applies between 2–24 hours before. No refund within 2 hours of the show. Refunds are processed within 3–5 business days.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">What payment methods do you accept?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          We accept Bank of Bhutan cards, Bhutan Pay, TashiCell mobile payments, and other major debit/credit cards. NDI-linked payment is coming soon. Cash payment is available at the cinema counter.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">How do I use my e-ticket at the cinema?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          After booking, your e-ticket with QR code is shown on screen and emailed to you. At the cinema entrance, simply present the QR code on your phone for scanning. No printing required. The QR code is unique to your booking and can only be used once.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">Do you offer student or group discounts?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          Yes! Students get 25% off with a valid student ID using promo code STUDENT25. Group bookings of 10+ seats get a 15% discount — contact us at groups@drukcinema.bt for group arrangements. Check our <a href="offers.html" style="color:var(--accent)">Offers page</a> for all current deals.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-q-text">How do I get notified about new movies and releases?</span>
+          <div class="faq-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-answer">
+          Click the "Notify Me" button on any Coming Soon movie card (you need to be signed in). You'll also receive updates if you subscribe to our newsletter. Follow us on social media @DrukCinema for the latest announcements.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="about-section about-section-alt" id="contact">
+  <div class="container">
+    <div style="margin-bottom:36px;">
+      <p class="as-eyebrow">Get In Touch</p>
+      <h2 class="as-title">Contact Us</h2>
+      <p style="font-size:14px;color:var(--text-sec);max-width:440px;line-height:1.7;">We'd love to hear from you — whether it's feedback, partnership opportunities, or just a hello.</p>
+    </div>
+    <div class="contact-grid">
+
+      <!-- Contact info -->
+      <div>
+        <div class="contact-info-card" style="margin-bottom:16px;">
+          <div class="contact-info-item">
+            <div class="ci-icon cii-red"><i class="fas fa-location-dot"></i></div>
+            <div>
+              <p class="ci-label">Head Office</p>
+              <p class="ci-val">Norzin Lam, Thimphu, Bhutan</p>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="ci-icon cii-blue"><i class="fas fa-envelope"></i></div>
+            <div>
+              <p class="ci-label">Email</p>
+              <p class="ci-val">hello@drukcinema.bt</p>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="ci-icon cii-green"><i class="fas fa-phone"></i></div>
+            <div>
+              <p class="ci-label">Phone</p>
+              <p class="ci-val">+975 2 323 456</p>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="ci-icon cii-gold"><i class="fas fa-clock"></i></div>
+            <div>
+              <p class="ci-label">Support Hours</p>
+              <p class="ci-val">Mon–Sat · 9:00 AM – 7:00 PM BST</p>
+            </div>
+          </div>
+        </div>
+        <!-- Social links -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="social-btn" aria-label="X/Twitter"><i class="fab fa-x-twitter"></i></a>
+        </div>
+      </div>
+
+      <!-- Contact form -->
+      <div class="contact-form-card">
+        <div class="cf-row">
+          <div class="cf-group">
+            <label class="cf-label" for="cfName">Your Name</label>
+            <input type="text" class="cf-input" id="cfName" placeholder="Tenzin Dorji">
+          </div>
+          <div class="cf-group">
+            <label class="cf-label" for="cfEmail">Email</label>
+            <input type="email" class="cf-input" id="cfEmail" placeholder="you@example.com">
+          </div>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label" for="cfSubject">Subject</label>
+          <select class="cf-select" id="cfSubject">
+            <option value="">Select a topic…</option>
+            <option>Booking Issue</option>
+            <option>Refund / Cancellation</option>
+            <option>Technical Problem</option>
+            <option>Partnership Enquiry</option>
+            <option>General Feedback</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label" for="cfMessage">Message</label>
+          <textarea class="cf-textarea" id="cfMessage" placeholder="Tell us how we can help…"></textarea>
+        </div>
+        <button class="cf-submit" id="cfSubmitBtn">
+          <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div>
+        <div class="footer-logo"><span class="logo-druk">DRUK</span><span class="logo-cinema">CINEMA</span></div>
+        <p class="footer-desc">Bhutan's premier movie ticketing platform.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="movies.html">Movies</a></li>
+          <li><a href="offers.html">Offers</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="about.html#faq">FAQs</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 DrukCinema</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <span class="footer-divider">|</span>
+        <a href="#">Terms</a>
+        <span class="footer-divider">|</span>
+        <span class="footer-made">Made in Bhutan 🐉</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+'use strict';
+
+/* ── FAQ accordion ──────────────────────────────────────── */
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', function () {
+    const item = this.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    /* Close all */
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    /* Toggle clicked */
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+/* ── Contact form ───────────────────────────────────────── */
+document.getElementById('cfSubmitBtn').addEventListener('click', function () {
+  const name    = document.getElementById('cfName').value.trim();
+  const email   = document.getElementById('cfEmail').value.trim();
+  const subject = document.getElementById('cfSubject').value;
+  const message = document.getElementById('cfMessage').value.trim();
+
+  if (!name || !email || !subject || !message) {
+    /* Simple inline feedback */
+    this.style.background = '#b91c1c';
+    this.textContent = 'Please fill all fields';
+    setTimeout(() => {
+      this.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+      this.style.background = '';
+    }, 2000);
+    return;
+  }
+
+  const orig = this.innerHTML;
+  this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+  this.disabled  = true;
+
+  setTimeout(() => {
+    /* In production: POST to /api/contact */
+    this.innerHTML = '<i class="fas fa-circle-check"></i> Message Sent! We\'ll reply soon.';
+    this.style.background = '#16a34a';
+    document.getElementById('cfName').value    = '';
+    document.getElementById('cfEmail').value   = '';
+    document.getElementById('cfSubject').value = '';
+    document.getElementById('cfMessage').value = '';
+    setTimeout(() => {
+      this.innerHTML = orig;
+      this.style.background = '';
+      this.disabled = false;
+    }, 4000);
+  }, 1500);
+});
+</script>
+</body>
+</html>

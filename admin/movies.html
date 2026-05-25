@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movies — DrukCinema Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-film"></i></div>
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">DrukCinema</span>
+          <span class="sidebar-brand-sub">Admin Panel</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Management</div>
+      <a href="dashboard.html">               <i class="fas fa-gauge-high"></i>    Dashboard</a>
+      <a href="movies.html"    class="active"><i class="fas fa-film"></i>           Movies</a>
+      <a href="showtimes.html">               <i class="fas fa-calendar-alt"></i>  Showtimes</a>
+      <a href="bookings.html">                <i class="fas fa-ticket"></i>         Bookings</a>
+      <div class="nav-section-label">Counter</div>
+      <a href="offline-booking.html">         <i class="fas fa-cash-register"></i> Offline Booking</a>
+      <a href="print-ticket.html">            <i class="fas fa-print"></i>          Print Tickets</a>
+      <a href="#" class="nav-logout" onclick="adminLogout()"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+    </nav>
+    <div class="sidebar-footer">DrukCinema Admin v1.0<br>© 2026 All rights reserved</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="topbar-left">
+          <h2>Movies</h2>
+          <p>Manage now-showing and coming-soon titles</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="topbar-avatar"><i class="fas fa-user"></i></div>
+          <div class="topbar-user-info">
+            <span class="topbar-username" id="topbarUser"></span>
+            <span class="topbar-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-body">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Movie Manager</h1>
+          <p id="movieCount">Loading…</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleForm()">
+          <i class="fas fa-plus" id="formToggleIcon"></i>
+          <span id="formToggleLabel">Add Movie</span>
+        </button>
+      </div>
+
+      <!-- ── Inline Form ──────────────────────────────── -->
+      <div class="form-panel" id="movieForm">
+        <div class="form-panel-header">
+          <div class="form-panel-title">
+            <i class="fas fa-film"></i>
+            <span id="formTitle">Add New Movie</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="resetForm()">
+            <i class="fas fa-xmark"></i> Cancel
+          </button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Movie Title *</label>
+            <input type="text" id="fTitle" class="form-control" placeholder="e.g. Lunana: A Yak in the Classroom">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Genre *</label>
+            <select id="fGenre" class="form-control">
+              <option value="">— Select Genre —</option>
+              <option>Drama</option>
+              <option>Comedy/Drama</option>
+              <option>Action</option>
+              <option>Thriller</option>
+              <option>Romance</option>
+              <option>Historical</option>
+              <option>Documentary</option>
+              <option>Mystery</option>
+              <option>Spiritual</option>
+              <option>Adventure</option>
+              <option>Cultural</option>
+              <option>Sci-Fi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Rating (1–5 stars) *</label>
+            <select id="fRating" class="form-control">
+              <option value="">— Select —</option>
+              <option value="1">★☆☆☆☆ — 1 Star</option>
+              <option value="2">★★☆☆☆ — 2 Stars</option>
+              <option value="3">★★★☆☆ — 3 Stars</option>
+              <option value="4">★★★★☆ — 4 Stars</option>
+              <option value="5">★★★★★ — 5 Stars</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <input type="text" id="fDuration" class="form-control" placeholder="e.g. 109 min">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Year</label>
+            <input type="number" id="fYear" class="form-control" placeholder="e.g. 2024" min="1900" max="2030">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Poster Image</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="url" id="fPoster" class="form-control"
+              placeholder="Paste URL — or use Upload / Library →">
+            <button type="button" class="btn btn-outline btn-sm"
+              onclick="triggerUpload()" title="Upload from your device"
+              style="white-space:nowrap;flex-shrink:0">
+              <i class="fas fa-upload"></i> Upload
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm"
+              onclick="toggleMediaLibrary()" title="Pick from saved posters"
+              style="white-space:nowrap;flex-shrink:0" id="libToggleBtn">
+              <i class="fas fa-images"></i> Library
+            </button>
+          </div>
+          <!-- Hidden file picker — Canvas compress before storing -->
+          <input type="file" id="posterFileInput" accept="image/*"
+            style="display:none" onchange="handleImageUpload(this)">
+          <div style="font-size:11px;color:var(--text3);margin-top:5px">
+            <i class="fas fa-circle-info" style="margin-right:3px;color:var(--accent)"></i>
+            Uploaded images are auto-resized (max 400×600 px) and compressed before saving.
+          </div>
+        </div>
+
+        <!-- ── Media Library panel ──────────────────────────── -->
+        <div id="mediaLibraryPanel" style="display:none;margin-bottom:16px;
+          background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">
+              <i class="fas fa-images" style="color:var(--accent);margin-right:6px"></i>Saved Posters
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="toggleMediaLibrary()">
+              <i class="fas fa-xmark"></i>
+            </button>
+          </div>
+          <div id="mediaLibraryGrid"
+            style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;
+            max-height:220px;overflow-y:auto">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Description</label>
+            <textarea id="fDesc" class="form-control" rows="3" placeholder="Brief synopsis…"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status *</label>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text2)">
+              <input type="radio" name="fStatus" value="now_showing" id="rNow" checked style="accent-color:var(--accent)">
+              <span>Now Showing</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text2)">
+              <input type="radio" name="fStatus" value="coming_soon" id="rSoon" style="accent-color:var(--accent)">
+              <span>Coming Soon</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Poster preview -->
+        <div id="posterPreviewWrap" style="margin-bottom:16px;display:none">
+          <div class="form-label">Preview</div>
+          <img id="posterPreview" src="" alt="Poster preview"
+            style="height:120px;width:auto;border-radius:6px;border:1px solid var(--border2)">
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-outline" onclick="resetForm()">
+            <i class="fas fa-xmark"></i> Cancel
+          </button>
+          <button class="btn btn-primary" onclick="saveMovie()">
+            <i class="fas fa-floppy-disk"></i> <span id="saveBtnLabel">Save Movie</span>
+          </button>
+        </div>
+      </div><!-- end form-panel -->
+
+      <!-- ── Movies Table ─────────────────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-list"></i> All Movies
+          </div>
+          <input type="text" id="searchInput" class="filter-control"
+            placeholder="🔍  Search movies…" oninput="renderTable()"
+            style="width:220px">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Rating</th>
+                <th>Duration</th>
+                <th>Year</th>
+                <th>Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="moviesTbody">
+              <tr><td colspan="8" class="table-empty"><i class="fas fa-film"></i>Loading movies…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+  checkAuth();
+  document.getElementById('topbarUser').textContent = getLoggedInUser();
+
+  let editingId = null;
+
+  // Poster URL preview
+  document.getElementById('fPoster').addEventListener('input', function() {
+    const url  = this.value.trim();
+    const wrap = document.getElementById('posterPreviewWrap');
+    const img  = document.getElementById('posterPreview');
+    if (url) { img.src = url; wrap.style.display = 'block'; }
+    else     { wrap.style.display = 'none'; }
+  });
+
+  function toggleForm() {
+    const panel = document.getElementById('movieForm');
+    if (panel.classList.contains('open')) { resetForm(); }
+    else {
+      editingId = null;
+      document.getElementById('formTitle').textContent      = 'Add New Movie';
+      document.getElementById('saveBtnLabel').textContent   = 'Save Movie';
+      document.getElementById('formToggleLabel').textContent = 'Cancel';
+      document.getElementById('formToggleIcon').className   = 'fas fa-xmark';
+      panel.classList.add('open');
+      panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+  }
+
+  function resetForm() {
+    editingId = null;
+    document.getElementById('movieForm').classList.remove('open');
+    document.getElementById('formToggleLabel').textContent = 'Add Movie';
+    document.getElementById('formToggleIcon').className    = 'fas fa-plus';
+    document.getElementById('fTitle').value   = '';
+    document.getElementById('fGenre').value   = '';
+    document.getElementById('fRating').value  = '';
+    document.getElementById('fDuration').value = '';
+    document.getElementById('fYear').value    = '';
+    document.getElementById('fPoster').value  = '';
+    document.getElementById('fDesc').value    = '';
+    document.getElementById('rNow').checked   = true;
+    document.getElementById('posterPreviewWrap').style.display = 'none';
+    document.getElementById('mediaLibraryPanel').style.display = 'none';
+  }
+
+  function editMovie(id) {
+    const movies = getMovies();
+    const m = movies.find(x => x.id === id);
+    if (!m) return;
+    editingId = id;
+
+    document.getElementById('fTitle').value    = m.title   || '';
+    document.getElementById('fGenre').value    = m.genre   || '';
+    document.getElementById('fRating').value   = m.rating  || '';
+    document.getElementById('fDuration').value = m.duration || '';
+    document.getElementById('fYear').value     = m.year    || '';
+    document.getElementById('fPoster').value   = m.posterUrl || '';
+    document.getElementById('fDesc').value     = m.description || '';
+    document.querySelector(`input[name="fStatus"][value="${m.status}"]`).checked = true;
+
+    if (m.posterUrl) {
+      document.getElementById('posterPreview').src = m.posterUrl;
+      document.getElementById('posterPreviewWrap').style.display = 'block';
+    }
+
+    document.getElementById('formTitle').textContent     = 'Edit Movie';
+    document.getElementById('saveBtnLabel').textContent  = 'Update Movie';
+    document.getElementById('formToggleLabel').textContent = 'Cancel';
+    document.getElementById('formToggleIcon').className  = 'fas fa-xmark';
+    document.getElementById('movieForm').classList.add('open');
+    document.getElementById('movieForm').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function saveMovie() {
+    const title  = document.getElementById('fTitle').value.trim();
+    const genre  = document.getElementById('fGenre').value;
+    const rating = parseInt(document.getElementById('fRating').value) || 0;
+    const status = document.querySelector('input[name="fStatus"]:checked')?.value || 'now_showing';
+
+    if (!title) { showToast('Please enter a movie title.', 'error'); document.getElementById('fTitle').focus(); return; }
+    if (!genre) { showToast('Please select a genre.', 'error'); return; }
+
+    const movie = {
+      id:          editingId || uid('m'),
+      title,
+      genre,
+      rating:      rating,
+      duration:    document.getElementById('fDuration').value.trim() || '',
+      year:        parseInt(document.getElementById('fYear').value) || null,
+      description: document.getElementById('fDesc').value.trim(),
+      posterUrl:   document.getElementById('fPoster').value.trim(),
+      status,
+    };
+
+    const movies = getMovies();
+    if (editingId) {
+      const idx = movies.findIndex(m => m.id === editingId);
+      if (idx >= 0) movies[idx] = movie;
+      showToast('Movie updated successfully!');
+    } else {
+      movies.push(movie);
+      showToast('Movie added successfully!');
+    }
+    saveMovies(movies);
+    resetForm();
+    renderTable();
+    updateCount();
+  }
+
+  function deleteMovie(id) {
+    if (!confirm('Delete this movie? Associated showtimes will remain.')) return;
+    const movies = getMovies().filter(m => m.id !== id);
+    saveMovies(movies);
+    renderTable();
+    updateCount();
+    showToast('Movie deleted.', 'info');
+  }
+
+  function renderTable() {
+    const query  = document.getElementById('searchInput').value.toLowerCase();
+    let movies   = getMovies();
+    if (query) movies = movies.filter(m =>
+      (m.title  || '').toLowerCase().includes(query) ||
+      (m.genre  || '').toLowerCase().includes(query)
+    );
+
+    const tbody = document.getElementById('moviesTbody');
+    if (movies.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="table-empty"><i class="fas fa-film"></i>${query ? 'No movies match your search.' : 'No movies yet. Click "Add Movie" to get started.'}</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = movies.map(m => `
+      <tr>
+        <td>
+          <img class="poster-thumb"
+            src="${esc(m.posterUrl)}" alt=""
+            onerror="this.src='https://via.placeholder.com/34x50/1e1e1e/444?text=?'">
+        </td>
+        <td>
+          <div class="td-bold">${esc(m.title)}</div>
+          <div style="font-size:11.5px;color:var(--text3);margin-top:2px">${esc(m.description||'').slice(0,60)}${(m.description||'').length>60?'…':''}</div>
+        </td>
+        <td><span style="font-size:12.5px">${esc(m.genre)}</span></td>
+        <td>${renderStars(m.rating)}</td>
+        <td style="color:var(--text2)">${esc(m.duration||'—')}</td>
+        <td style="color:var(--text2)">${m.year||'—'}</td>
+        <td>${statusBadge(m.status)}</td>
+        <td style="text-align:right">
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            <button class="btn btn-warning btn-icon btn-sm" onclick="editMovie('${m.id}')" title="Edit">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteMovie('${m.id}')" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function updateCount() {
+    const movies = getMovies();
+    document.getElementById('movieCount').textContent =
+      `${movies.length} total · ${movies.filter(m=>m.status==='now_showing').length} showing · ${movies.filter(m=>m.status==='coming_soon').length} coming soon`;
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  // ── Image Upload ──────────────────────────────────────────────────
+  function triggerUpload() {
+    document.getElementById('posterFileInput').click();
+  }
+
+  function handleImageUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (JPG, PNG, WebP…)', 'error');
+      return;
+    }
+
+    const MAX_W = 400, MAX_H = 600, QUALITY = 0.78;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        /* Scale down to max 400×600, preserve aspect ratio */
+        let w = img.width, h = img.height;
+        if (w > MAX_W || h > MAX_H) {
+          const scale = Math.min(MAX_W / w, MAX_H / h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
+        /* base64 char count × 0.75 ≈ byte count */
+        const sizeKB  = Math.round(dataUrl.length * 0.75 / 1024);
+
+        /* Push into the URL field and live-preview */
+        document.getElementById('fPoster').value = dataUrl;
+        const preview = document.getElementById('posterPreview');
+        preview.src = dataUrl;
+        document.getElementById('posterPreviewWrap').style.display = 'block';
+
+        showToast(`Image ready — compressed to ~${sizeKB} KB (${w}×${h} px)`);
+
+        /* Reset so the same file can be re-selected if needed */
+        input.value = '';
+      };
+      img.onerror = function() {
+        showToast('Could not read the selected image.', 'error');
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = function() {
+      showToast('Failed to read the file.', 'error');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Media Library ─────────────────────────────────────────────────
+  function toggleMediaLibrary() {
+    const panel  = document.getElementById('mediaLibraryPanel');
+    const btnEl  = document.getElementById('libToggleBtn');
+    const isOpen = panel.style.display === 'block';
+
+    if (isOpen) {
+      panel.style.display = 'none';
+      btnEl.innerHTML = '<i class="fas fa-images"></i> Library';
+    } else {
+      renderMediaLibrary();
+      panel.style.display = 'block';
+      btnEl.innerHTML = '<i class="fas fa-xmark"></i> Close';
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  /* Store library items so selectFromLibrary(idx) can look up the raw URL */
+  var _libMovies = [];
+
+  function renderMediaLibrary() {
+    _libMovies = getMovies().filter(function(m) { return m.posterUrl; });
+    const grid = document.getElementById('mediaLibraryGrid');
+
+    if (_libMovies.length === 0) {
+      grid.innerHTML =
+        '<p style="font-size:12.5px;color:var(--text3);padding:6px 0;grid-column:1/-1">' +
+        'No posters saved yet. Upload an image or add a poster URL to any movie first.</p>';
+      return;
+    }
+
+    /* Use index-based onclick to avoid URL escaping issues in onclick strings */
+    grid.innerHTML = _libMovies.map(function(m, i) {
+      return (
+        '<div onclick="selectFromLibrary(' + i + ')" style="' +
+          'cursor:pointer;text-align:center;padding:6px 4px;border-radius:6px;' +
+          'border:2px solid transparent;transition:all 0.15s" ' +
+          'onmouseover="this.style.borderColor=\'var(--accent)\';this.style.background=\'rgba(229,9,20,0.07)\'" ' +
+          'onmouseout="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">' +
+          '<img src="' + esc(m.posterUrl) + '" alt="' + esc(m.title) + '" ' +
+            'style="width:54px;height:80px;object-fit:cover;border-radius:4px;display:block;margin:0 auto" ' +
+            'onerror="this.src=\'https://via.placeholder.com/54x80/1e1e1e/444?text=?\'"> ' +
+          '<div style="font-size:10px;color:var(--text3);margin-top:4px;' +
+            'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:68px">' +
+            esc(m.title) +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function selectFromLibrary(idx) {
+    const m = _libMovies[idx];
+    if (!m) return;
+    const url = m.posterUrl;
+    document.getElementById('fPoster').value             = url;
+    document.getElementById('posterPreview').src         = url;
+    document.getElementById('posterPreviewWrap').style.display = 'block';
+    /* Close library and reset its button */
+    document.getElementById('mediaLibraryPanel').style.display = 'none';
+    document.getElementById('libToggleBtn').innerHTML = '<i class="fas fa-images"></i> Library';
+    showToast('Poster selected from media library.', 'info');
+  }
+
+  // Init
+  renderTable();
+  updateCount();
+</script>
+</body>
+</html>

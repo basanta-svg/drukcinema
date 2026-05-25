@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Print Ticket — DrukCinema Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-film"></i></div>
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">DrukCinema</span>
+          <span class="sidebar-brand-sub">Admin Panel</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Management</div>
+      <a href="dashboard.html">                    <i class="fas fa-gauge-high"></i>   Dashboard</a>
+      <a href="movies.html">                        <i class="fas fa-film"></i>          Movies</a>
+      <a href="showtimes.html">                     <i class="fas fa-calendar-alt"></i> Showtimes</a>
+      <a href="bookings.html">                      <i class="fas fa-ticket"></i>        Bookings</a>
+      <div class="nav-section-label">Counter</div>
+      <a href="offline-booking.html">               <i class="fas fa-cash-register"></i> Offline Booking</a>
+      <a href="print-ticket.html"   class="active"> <i class="fas fa-print"></i>          Print Tickets</a>
+      <a href="#" class="nav-logout" onclick="adminLogout()"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+    </nav>
+    <div class="sidebar-footer">DrukCinema Admin v1.0<br>© 2026 All rights reserved</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar print-hide">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="topbar-left">
+          <h2>Print Tickets</h2>
+          <p>Search and print booking tickets</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="topbar-avatar"><i class="fas fa-user"></i></div>
+          <div class="topbar-user-info">
+            <span class="topbar-username" id="topbarUser"></span>
+            <span class="topbar-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-body">
+
+      <!-- ── Search Panel ───────────────────────────── -->
+      <div class="card print-hide" style="margin-bottom:24px">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-magnifying-glass"></i> Search Booking</div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+            <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0">
+              <label class="form-label">Booking ID or Customer Name</label>
+              <input type="text" id="searchInput" class="form-control"
+                placeholder="e.g. BK240001 or Tenzin"
+                oninput="liveSearch()">
+            </div>
+            <button class="btn btn-primary" onclick="doSearch()">
+              <i class="fas fa-search"></i> Search
+            </button>
+            <button class="btn btn-ghost" onclick="clearSearch()">
+              <i class="fas fa-xmark"></i> Clear
+            </button>
+          </div>
+
+          <!-- Live search results dropdown -->
+          <div id="searchResults" style="margin-top:14px;display:none">
+            <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700">
+              Results
+            </div>
+            <div id="searchResultsList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Ticket Display ─────────────────────────── -->
+      <div id="ticketArea" style="display:none">
+        <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap" class="print-hide">
+          <button class="btn btn-gold btn-lg" onclick="window.print()">
+            <i class="fas fa-print"></i> Print Ticket
+          </button>
+          <button class="btn btn-outline" onclick="clearSearch()">
+            <i class="fas fa-search"></i> Search Another
+          </button>
+          <a href="offline-booking.html" class="btn btn-ghost">
+            <i class="fas fa-plus"></i> New Booking
+          </a>
+        </div>
+
+        <!-- Ticket card (this gets printed) -->
+        <div class="ticket-wrap" id="ticketWrap">
+          <div class="ticket-card">
+
+            <!-- Header -->
+            <div class="ticket-head">
+              <span class="ticket-logo-text">DrukCinema</span>
+              <span class="ticket-sub-text">Official Cinema Ticket</span>
+            </div>
+
+            <!-- Body -->
+            <div class="ticket-body">
+              <div class="ticket-movie" id="tMovie">—</div>
+
+              <div class="ticket-grid">
+                <div class="ticket-field">
+                  <div class="ticket-field-label"><i class="fas fa-calendar" style="color:var(--accent);margin-right:4px"></i>Date</div>
+                  <div class="ticket-field-value" id="tDate">—</div>
+                </div>
+                <div class="ticket-field">
+                  <div class="ticket-field-label"><i class="fas fa-clock" style="color:var(--accent);margin-right:4px"></i>Time</div>
+                  <div class="ticket-field-value" id="tTime">—</div>
+                </div>
+                <div class="ticket-field">
+                  <div class="ticket-field-label"><i class="fas fa-door-open" style="color:var(--accent);margin-right:4px"></i>Hall</div>
+                  <div class="ticket-field-value" id="tHall">—</div>
+                </div>
+                <div class="ticket-field">
+                  <div class="ticket-field-label"><i class="fas fa-user" style="color:var(--accent);margin-right:4px"></i>Customer</div>
+                  <div class="ticket-field-value" id="tCustomer">—</div>
+                </div>
+                <div class="ticket-field">
+                  <div class="ticket-field-label"><i class="fas fa-phone" style="color:var(--accent);margin-right:4px"></i>Phone</div>
+                  <div class="ticket-field-value" id="tPhone">—</div>
+                </div>
+                <div class="ticket-field">
+                  <div class="ticket-field-label"><i class="fas fa-tag" style="color:var(--accent);margin-right:4px"></i>Type</div>
+                  <div class="ticket-field-value" id="tType">—</div>
+                </div>
+              </div>
+
+              <hr class="ticket-divider">
+
+              <div class="ticket-seats-wrap">
+                <div class="ticket-seats-label">
+                  <i class="fas fa-chair" style="color:var(--accent);margin-right:5px"></i>Seats
+                </div>
+                <div class="ticket-seats" id="tSeats"></div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="ticket-foot">
+              <div>
+                <div style="font-size:10px;color:var(--text3);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px">Amount Paid</div>
+                <div class="ticket-amount" id="tAmount">—</div>
+              </div>
+              <div class="ticket-id">
+                <div style="font-size:9.5px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px">Booking ID</div>
+                <div id="tId">—</div>
+              </div>
+            </div>
+
+          </div><!-- end ticket-card -->
+
+          <!-- Ticket stub / barcode area -->
+          <div style="margin-top:8px;text-align:center;font-size:10px;color:var(--text3)" class="print-hide">
+            <i class="fas fa-circle-info" style="margin-right:4px"></i>
+            Present this ticket or your Booking ID at the entrance.
+          </div>
+
+        </div><!-- end ticket-wrap -->
+      </div><!-- end ticketArea -->
+
+      <!-- ── Empty State ─────────────────────────────── -->
+      <div id="emptyState">
+        <div style="text-align:center;padding:60px 20px;color:var(--text3)">
+          <i class="fas fa-ticket" style="font-size:3rem;display:block;margin-bottom:16px;color:var(--border2)"></i>
+          <h3 style="color:var(--text2);margin-bottom:8px">Search for a Booking</h3>
+          <p style="font-size:13px;max-width:340px;margin:0 auto">
+            Enter a Booking ID (e.g. <span style="color:var(--accent);font-family:monospace">BK240001</span>)
+            or a customer's name above to pull up their ticket.
+          </p>
+        </div>
+
+        <!-- Recent bookings quick-access -->
+        <div class="card" style="max-width:620px;margin:0 auto">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recent Bookings</div>
+          </div>
+          <div id="recentList"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+  checkAuth();
+  document.getElementById('topbarUser').textContent = getLoggedInUser();
+
+  // ── Check for ?id= param on load ──────────────────────
+  function init() {
+    loadRecentList();
+    const params = new URLSearchParams(window.location.search);
+    const id     = params.get('id');
+    if (id) {
+      document.getElementById('searchInput').value = id;
+      findAndShow(id);
+    }
+  }
+
+  // ── Search ─────────────────────────────────────────────
+  function liveSearch() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (q.length < 2) {
+      document.getElementById('searchResults').style.display = 'none';
+      return;
+    }
+    const bookings = getBookings().filter(b =>
+      (b.id||'').toLowerCase().includes(q) ||
+      (b.customerName||'').toLowerCase().includes(q) ||
+      (b.phone||'').includes(q)
+    ).slice(0, 6);
+
+    const res = document.getElementById('searchResults');
+    const list = document.getElementById('searchResultsList');
+    if (bookings.length === 0) {
+      list.innerHTML = `<p style="font-size:13px;color:var(--text3);padding:6px 0">No bookings found.</p>`;
+    } else {
+      list.innerHTML = bookings.map(b => `
+        <div onclick="findAndShow('${esc(b.id)}')" style="
+          display:flex;align-items:center;justify-content:space-between;
+          padding:10px 14px;border:1px solid var(--border2);border-radius:6px;
+          margin-bottom:7px;cursor:pointer;background:rgba(255,255,255,0.02);
+          transition:background 0.15s" onmouseover="this.style.background='rgba(229,9,20,0.05)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+          <div>
+            <div style="font-weight:700;color:var(--text1);font-size:13.5px">${esc(b.customerName)}</div>
+            <div style="font-size:11.5px;color:var(--text3)">${esc(b.movieTitle)} · ${formatDate(b.date)} ${b.time}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:monospace;font-size:12px;color:var(--accent)">${esc(b.id)}</div>
+            <div>${statusBadge(b.status)}</div>
+          </div>
+        </div>`).join('');
+    }
+    res.style.display = 'block';
+  }
+
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    findAndShow(q);
+  }
+
+  function findAndShow(query) {
+    const q = query.toLowerCase();
+    const bookings = getBookings();
+    const b = bookings.find(x =>
+      (x.id||'').toLowerCase() === q ||
+      (x.id||'').toLowerCase().includes(q) ||
+      (x.customerName||'').toLowerCase().includes(q)
+    );
+
+    document.getElementById('searchResults').style.display = 'none';
+
+    if (!b) {
+      showToast(`No booking found for "${query}".`, 'error');
+      return;
+    }
+    showTicket(b);
+  }
+
+  function showTicket(b) {
+    document.getElementById('emptyState').style.display  = 'none';
+    document.getElementById('ticketArea').style.display  = 'block';
+
+    document.getElementById('tMovie').textContent    = b.movieTitle || '—';
+    document.getElementById('tDate').textContent     = formatDate(b.date);
+    document.getElementById('tTime').textContent     = b.time || '—';
+    document.getElementById('tHall').textContent     = 'Hall ' + (b.hall || '—');
+    document.getElementById('tCustomer').textContent = b.customerName || '—';
+    document.getElementById('tPhone').textContent    = b.phone || '—';
+    document.getElementById('tType').textContent     = b.type === 'offline' ? 'Counter / Offline' : 'Online';
+    document.getElementById('tAmount').textContent   = formatCurrency(b.amount);
+    document.getElementById('tId').textContent       = b.id || '—';
+
+    // Seats
+    document.getElementById('tSeats').innerHTML =
+      (b.seats||[]).map(s => `<span class="ticket-seat-pill">${s}</span>`).join('') ||
+      '<span style="color:var(--text3);font-size:13px">No seats recorded</span>';
+  }
+
+  function clearSearch() {
+    document.getElementById('searchInput').value             = '';
+    document.getElementById('searchResults').style.display  = 'none';
+    document.getElementById('ticketArea').style.display     = 'none';
+    document.getElementById('emptyState').style.display     = 'block';
+    // Clear URL param
+    history.replaceState({}, '', 'print-ticket.html');
+  }
+
+  // ── Recent bookings list ──────────────────────────────
+  function loadRecentList() {
+    const bookings = [...getBookings()].reverse().slice(0, 6);
+    const el       = document.getElementById('recentList');
+    if (bookings.length === 0) {
+      el.innerHTML = `<p style="padding:18px 20px;color:var(--text3);font-size:13px">No bookings yet.</p>`;
+      return;
+    }
+    el.innerHTML = bookings.map(b => `
+      <div onclick="findAndShow('${esc(b.id)}')" style="
+        display:flex;align-items:center;justify-content:space-between;
+        padding:11px 18px;border-bottom:1px solid var(--border2);cursor:pointer;
+        transition:background 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.03)'"
+        onmouseout="this.style.background='transparent'">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--text1)">${esc(b.customerName)}</div>
+          <div style="font-size:11.5px;color:var(--text3);margin-top:1px">${esc(b.movieTitle)} · ${b.time}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          ${statusBadge(b.status)}
+          <span style="font-family:monospace;font-size:12px;color:var(--text3)">${esc(b.id)}</span>
+          <span style="color:var(--accent);font-size:12px"><i class="fas fa-print"></i></span>
+        </div>
+      </div>`).join('');
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  // Allow Enter key to search
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  init();
+</script>
+</body>
+</html>

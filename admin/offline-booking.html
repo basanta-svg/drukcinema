@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline Booking — DrukCinema Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-film"></i></div>
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">DrukCinema</span>
+          <span class="sidebar-brand-sub">Admin Panel</span>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Management</div>
+      <a href="dashboard.html">                       <i class="fas fa-gauge-high"></i>   Dashboard</a>
+      <a href="movies.html">                           <i class="fas fa-film"></i>          Movies</a>
+      <a href="showtimes.html">                        <i class="fas fa-calendar-alt"></i> Showtimes</a>
+      <a href="bookings.html">                         <i class="fas fa-ticket"></i>        Bookings</a>
+      <div class="nav-section-label">Counter</div>
+      <a href="offline-booking.html" class="active">   <i class="fas fa-cash-register"></i> Offline Booking</a>
+      <a href="print-ticket.html">                     <i class="fas fa-print"></i>          Print Tickets</a>
+      <a href="#" class="nav-logout" onclick="adminLogout()"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+    </nav>
+    <div class="sidebar-footer">DrukCinema Admin v1.0<br>© 2026 All rights reserved</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="topbar-left">
+          <h2>Offline Booking</h2>
+          <p>Counter / walk-in ticket booking</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="resetWizard()" id="resetBtn" style="display:none">
+          <i class="fas fa-rotate-left"></i> New Booking
+        </button>
+        <div class="topbar-user">
+          <div class="topbar-avatar"><i class="fas fa-user"></i></div>
+          <div class="topbar-user-info">
+            <span class="topbar-username" id="topbarUser"></span>
+            <span class="topbar-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-body">
+
+      <!-- ── Progress Steps ──────────────────────────── -->
+      <div class="booking-steps" id="progressSteps">
+        <div class="bstep active" id="step-ind-1">
+          <div class="bstep-num">1</div>
+          <div class="bstep-lbl">Movie</div>
+        </div>
+        <div class="bstep-conn" id="conn-1"></div>
+        <div class="bstep pending" id="step-ind-2">
+          <div class="bstep-num">2</div>
+          <div class="bstep-lbl">Showtime</div>
+        </div>
+        <div class="bstep-conn" id="conn-2"></div>
+        <div class="bstep pending" id="step-ind-3">
+          <div class="bstep-num">3</div>
+          <div class="bstep-lbl">Seats</div>
+        </div>
+        <div class="bstep-conn" id="conn-3"></div>
+        <div class="bstep pending" id="step-ind-4">
+          <div class="bstep-num">4</div>
+          <div class="bstep-lbl">Customer</div>
+        </div>
+        <div class="bstep-conn" id="conn-4"></div>
+        <div class="bstep pending" id="step-ind-5">
+          <div class="bstep-num">5</div>
+          <div class="bstep-lbl">Confirm</div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           STEP 1 — Select Movie
+      ════════════════════════════════════════════ -->
+      <div class="step-panel active" id="step1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-film"></i> Step 1 — Select Movie</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group" style="max-width:480px">
+              <label class="form-label">Choose a Movie *</label>
+              <select id="movieSelect" class="form-control" onchange="onMovieChange()">
+                <option value="">— Select a movie —</option>
+              </select>
+            </div>
+            <div id="moviePreview" style="display:none;margin-top:18px">
+              <div style="display:flex;gap:18px;align-items:flex-start;max-width:600px">
+                <img id="mpPoster" src="" alt=""
+                  style="width:80px;height:120px;object-fit:cover;border-radius:8px;border:1px solid var(--border2);flex-shrink:0"
+                  onerror="this.style.display='none'">
+                <div>
+                  <h3 id="mpTitle" style="font-size:1.05rem;color:var(--text1);margin-bottom:6px"></h3>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+                    <span id="mpGenre" class="badge badge-secondary"></span>
+                    <span id="mpYear" class="badge badge-secondary"></span>
+                    <span id="mpDuration" class="badge badge-secondary"></span>
+                    <span id="mpStatus"></span>
+                  </div>
+                  <p id="mpDesc" style="font-size:12.5px;color:var(--text3);line-height:1.7"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer" style="text-align:right">
+            <button class="btn btn-primary" onclick="goStep(2)" id="s1Next" disabled>
+              Next: Choose Showtime <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           STEP 2 — Select Showtime
+      ════════════════════════════════════════════ -->
+      <div class="step-panel" id="step2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-calendar-alt"></i> Step 2 — Select Showtime</div>
+            <button class="btn btn-ghost btn-sm" onclick="goStep(1)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="showtimeCards" class="showtime-cards"></div>
+            <p id="noShowtimes" style="color:var(--text3);display:none;font-size:13px;padding:10px 0">
+              <i class="fas fa-calendar-xmark" style="color:var(--accent);margin-right:6px"></i>
+              No upcoming showtimes found for this movie. Please
+              <a href="showtimes.html" style="color:var(--accent)">add a showtime</a> first.
+            </p>
+          </div>
+          <div class="card-footer" style="text-align:right">
+            <button class="btn btn-primary" onclick="goStep(3)" id="s2Next" disabled>
+              Next: Pick Seats <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           STEP 3 — Seat Map
+      ════════════════════════════════════════════ -->
+      <div class="step-panel" id="step3">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-chair"></i> Step 3 — Select Seats</div>
+            <button class="btn btn-ghost btn-sm" onclick="goStep(2)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+              <div class="badge badge-info" id="seatShowInfo"></div>
+              <div class="badge badge-secondary" id="seatAvailInfo"></div>
+            </div>
+            <div class="seat-map-wrap">
+              <div id="seatMapContainer"></div>
+            </div>
+            <div style="margin-top:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+              <div style="font-size:13.5px;color:var(--text2)">
+                Selected:
+                <span id="selectedSeatsDisplay" style="color:var(--gold);font-weight:700">None</span>
+              </div>
+              <div style="font-size:13.5px;color:var(--text2)">
+                Subtotal:
+                <span id="subtotalDisplay" style="color:var(--gold);font-weight:700">Nu. 0</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer" style="text-align:right">
+            <button class="btn btn-primary" onclick="goStep(4)" id="s3Next" disabled>
+              Next: Customer Details <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           STEP 4 — Customer Details
+      ════════════════════════════════════════════ -->
+      <div class="step-panel" id="step4">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-user"></i> Step 4 — Customer Details</div>
+            <button class="btn btn-ghost btn-sm" onclick="goStep(3)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div class="card-body" style="max-width:520px">
+            <div class="form-group">
+              <label class="form-label">Customer Full Name *</label>
+              <input type="text" id="custName" class="form-control"
+                placeholder="e.g. Tenzin Dorji" autofocus oninput="validateCustomer()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" id="custPhone" class="form-control"
+                placeholder="e.g. 17123456" oninput="validateCustomer()" maxlength="15">
+            </div>
+            <div id="custError" style="color:var(--accent);font-size:12.5px;display:none;margin-top:-8px;margin-bottom:10px">
+              <i class="fas fa-exclamation-circle"></i> Please fill in all required fields.
+            </div>
+          </div>
+          <div class="card-footer" style="text-align:right">
+            <button class="btn btn-primary" onclick="goStep(5)" id="s4Next" disabled>
+              Next: Review &amp; Confirm <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           STEP 5 — Summary & Confirm
+      ════════════════════════════════════════════ -->
+      <div class="step-panel" id="step5">
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+
+          <!-- Summary -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fas fa-receipt"></i> Step 5 — Booking Summary</div>
+              <button class="btn btn-ghost btn-sm" onclick="goStep(4)">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="summary-box" id="summaryBox">
+                <div class="summary-row"><span class="sum-label">Movie</span>       <span class="sum-value" id="sumMovie">—</span></div>
+                <div class="summary-row"><span class="sum-label">Date</span>        <span class="sum-value" id="sumDate">—</span></div>
+                <div class="summary-row"><span class="sum-label">Time</span>        <span class="sum-value" id="sumTime">—</span></div>
+                <div class="summary-row"><span class="sum-label">Hall</span>        <span class="sum-value" id="sumHall">—</span></div>
+                <div class="summary-row"><span class="sum-label">Seats</span>       <span class="sum-value" id="sumSeats">—</span></div>
+                <div class="summary-row"><span class="sum-label">Customer</span>    <span class="sum-value" id="sumName">—</span></div>
+                <div class="summary-row"><span class="sum-label">Phone</span>       <span class="sum-value" id="sumPhone">—</span></div>
+                <div class="summary-row"><span class="sum-label">Price/Seat</span>  <span class="sum-value" id="sumPriceEa">—</span></div>
+                <div class="summary-row total-row">
+                  <span class="sum-label" style="color:var(--text2);font-weight:600">Total Amount</span>
+                  <span class="sum-value gold" id="sumTotal">—</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer" style="text-align:right">
+              <button class="btn btn-primary btn-lg" onclick="confirmBooking()" id="confirmBtn">
+                <i class="fas fa-check-circle"></i> Confirm Booking
+              </button>
+            </div>
+          </div>
+
+          <!-- Seat visual -->
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-chair"></i> Selected Seats</div>
+              </div>
+              <div class="card-body">
+                <div id="finalSeatsBadges" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+                <div style="margin-top:14px;font-size:12.5px;color:var(--text3)">
+                  <i class="fas fa-tag" style="color:var(--gold);margin-right:5px"></i>
+                  Nu. <span id="finalPriceEa">150</span> per seat
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- end step5 -->
+
+      <!-- ════════════════════════════════════════════
+           STEP 6 — Success
+      ════════════════════════════════════════════ -->
+      <div class="step-panel" id="step6">
+        <div style="max-width:520px;margin:0 auto">
+          <div class="success-box" style="margin-bottom:20px">
+            <i class="fas fa-circle-check"></i>
+            <h3>Booking Confirmed!</h3>
+            <p>The ticket has been saved successfully.</p>
+          </div>
+
+          <div class="card" style="margin-bottom:18px">
+            <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700">Booking ID</div>
+              <div id="confirmedId" style="font-size:1.5rem;font-weight:900;color:var(--accent);font-family:monospace;letter-spacing:1px"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a id="printLink" href="#" class="btn btn-gold btn-lg" style="flex:1;justify-content:center">
+              <i class="fas fa-print"></i> Print Ticket
+            </a>
+            <button class="btn btn-outline btn-lg" onclick="resetWizard()" style="flex:1">
+              <i class="fas fa-plus"></i> New Booking
+            </button>
+            <a href="bookings.html" class="btn btn-ghost btn-lg" style="flex:1;justify-content:center">
+              <i class="fas fa-list"></i> All Bookings
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+  checkAuth();
+  document.getElementById('topbarUser').textContent = getLoggedInUser();
+
+  // ── State ────────────────────────────────────────────────
+  let state = {
+    movie:     null,   // movie object
+    showtime:  null,   // showtime object
+    seats:     [],     // selected seat IDs
+    name:      '',
+    phone:     '',
+  };
+
+  const PRICE_PER_SEAT = 150;
+
+  // ── Init ────────────────────────────────────────────────
+  function init() {
+    populateMovieSelect();
+  }
+
+  function populateMovieSelect() {
+    const movies = getMovies();
+    const sel    = document.getElementById('movieSelect');
+    sel.innerHTML = '<option value="">— Select a movie —</option>' +
+      movies.map(m => `<option value="${m.id}">${esc(m.title)}${m.status==='coming_soon'?' (Coming Soon)':''}</option>`).join('');
+  }
+
+  // ── Step navigation ────────────────────────────────────
+  function goStep(n) {
+    // Validate before advancing
+    if (n === 2 && !state.movie)    { showToast('Please select a movie.', 'error');    return; }
+    if (n === 3 && !state.showtime) { showToast('Please select a showtime.', 'error'); return; }
+    if (n === 4 && state.seats.length === 0) { showToast('Please select at least one seat.', 'error'); return; }
+    if (n === 5) {
+      const nm = document.getElementById('custName').value.trim();
+      const ph = document.getElementById('custPhone').value.trim();
+      if (!nm || !ph) {
+        document.getElementById('custError').style.display = 'block';
+        showToast('Please enter customer name and phone.', 'error');
+        return;
+      }
+      state.name  = nm;
+      state.phone = ph;
+    }
+
+    // Update steps
+    [1,2,3,4,5,6].forEach(i => {
+      document.getElementById(`step${i}`)?.classList.remove('active');
+    });
+    document.getElementById(`step${n}`).classList.add('active');
+
+    // Update indicator
+    [1,2,3,4,5].forEach(i => {
+      const ind = document.getElementById(`step-ind-${i}`);
+      const conn = document.getElementById(`conn-${i}`);
+      ind.className = 'bstep ' + (i < n ? 'done' : i === n ? 'active' : 'pending');
+      if (conn) conn.className = 'bstep-conn' + (i < n ? ' done' : '');
+    });
+
+    if (n === 2) renderShowtimes();
+    if (n === 3) { renderSeatMap(); }
+    if (n === 5) renderSummary();
+
+    document.getElementById('resetBtn').style.display = n >= 2 ? 'inline-flex' : 'none';
+  }
+
+  // ── Step 1: Movie ──────────────────────────────────────
+  function onMovieChange() {
+    const id     = document.getElementById('movieSelect').value;
+    const movies = getMovies();
+    state.movie  = movies.find(m => m.id === id) || null;
+    state.showtime = null;
+    state.seats    = [];
+
+    const prev = document.getElementById('moviePreview');
+    const s1n  = document.getElementById('s1Next');
+    if (!state.movie) { prev.style.display = 'none'; s1n.disabled = true; return; }
+
+    s1n.disabled = false;
+    document.getElementById('mpPoster').src   = state.movie.posterUrl  || '';
+    document.getElementById('mpTitle').textContent  = state.movie.title || '';
+    document.getElementById('mpGenre').textContent  = state.movie.genre || '';
+    document.getElementById('mpYear').textContent   = state.movie.year  || '';
+    document.getElementById('mpDuration').textContent = state.movie.duration || '';
+    document.getElementById('mpStatus').innerHTML   = statusBadge(state.movie.status);
+    document.getElementById('mpDesc').textContent   = state.movie.description || '';
+    prev.style.display = 'flex';
+  }
+
+  // ── Step 2: Showtime ───────────────────────────────────
+  function renderShowtimes() {
+    if (!state.movie) return;
+    const today     = todayStr();
+    const showtimes = getShowtimes()
+      .filter(s => s.movieId === state.movie.id && s.date >= today)
+      .sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+    const container = document.getElementById('showtimeCards');
+    const noMsg     = document.getElementById('noShowtimes');
+    document.getElementById('s2Next').disabled = true;
+    state.showtime = null;
+
+    if (showtimes.length === 0) {
+      container.innerHTML = '';
+      noMsg.style.display = 'block';
+      return;
+    }
+    noMsg.style.display = 'none';
+
+    container.innerHTML = showtimes.map(s => {
+      const booked = s.bookedSeats ? s.bookedSeats.length : 0;
+      const avail  = s.totalSeats - booked;
+      const pct    = Math.round((booked / s.totalSeats) * 100);
+      const availClass = avail === 0 ? 'avail-full' : avail <= 10 ? 'avail-low' : 'avail-good';
+      const availText  = avail === 0 ? 'Sold Out' : `${avail} seats available`;
+      return `
+        <div class="showtime-card" id="sc-${s.id}" onclick="selectShowtime('${s.id}')"
+          ${avail === 0 ? 'style="opacity:0.5;pointer-events:none"' : ''}>
+          <div class="showtime-card-time">${s.time}</div>
+          <div class="showtime-card-date">${formatDate(s.date)}</div>
+          <div class="showtime-card-meta">
+            <span><i class="fas fa-door-open"></i> Hall ${s.hall}</span>
+            <span><i class="fas fa-chair"></i> ${s.totalSeats}</span>
+          </div>
+          <div class="showtime-avail ${availClass}" style="margin-top:10px;font-size:12px">
+            <i class="fas fa-${avail===0?'ban':avail<=10?'triangle-exclamation':'circle-check'}"></i>
+            ${availText}
+          </div>
+          <div style="margin-top:8px;height:4px;background:var(--border2);border-radius:2px">
+            <div style="height:100%;width:${pct}%;background:${pct>=90?'var(--accent)':pct>=60?'var(--gold)':'#22c55e'};border-radius:2px"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function selectShowtime(id) {
+    state.showtime = getShowtimes().find(s => s.id === id) || null;
+    state.seats    = [];
+    document.querySelectorAll('.showtime-card').forEach(c => c.classList.remove('selected'));
+    if (state.showtime) {
+      document.getElementById(`sc-${id}`)?.classList.add('selected');
+      document.getElementById('s2Next').disabled = false;
+    }
+  }
+
+  // ── Step 3: Seat Map ───────────────────────────────────
+  function renderSeatMap() {
+    if (!state.showtime) return;
+    const s     = state.showtime;
+    const avail = s.totalSeats - (s.bookedSeats||[]).length;
+    document.getElementById('seatShowInfo').textContent =
+      `${formatDate(s.date)} · ${s.time} · Hall ${s.hall}`;
+    document.getElementById('seatAvailInfo').textContent =
+      `${avail} of ${s.totalSeats} available`;
+
+    buildSeatMap('seatMapContainer', {
+      totalSeats:   s.totalSeats,
+      bookedSeats:  s.bookedSeats || [],
+      selectedSeats: state.seats,
+      onToggle:     toggleSeat,
+    });
+    updateSeatDisplay();
+  }
+
+  function toggleSeat(seatId) {
+    const idx = state.seats.indexOf(seatId);
+    if (idx >= 0) state.seats.splice(idx, 1);
+    else          state.seats.push(seatId);
+    // Re-render map with new selection
+    buildSeatMap('seatMapContainer', {
+      totalSeats:    state.showtime.totalSeats,
+      bookedSeats:   state.showtime.bookedSeats || [],
+      selectedSeats: state.seats,
+      onToggle:      toggleSeat,
+    });
+    updateSeatDisplay();
+  }
+
+  function updateSeatDisplay() {
+    const n = state.seats.length;
+    document.getElementById('selectedSeatsDisplay').textContent =
+      n === 0 ? 'None' : state.seats.join(', ');
+    document.getElementById('subtotalDisplay').textContent =
+      formatCurrency(n * PRICE_PER_SEAT);
+    document.getElementById('s3Next').disabled = n === 0;
+  }
+
+  // ── Step 4: Customer ───────────────────────────────────
+  function validateCustomer() {
+    const nm = document.getElementById('custName').value.trim();
+    const ph = document.getElementById('custPhone').value.trim();
+    const ok = nm.length > 0 && ph.length >= 7;
+    document.getElementById('s4Next').disabled = !ok;
+    if (ok) document.getElementById('custError').style.display = 'none';
+  }
+
+  // ── Step 5: Summary ────────────────────────────────────
+  function renderSummary() {
+    const s = state.showtime;
+    const m = state.movie;
+    const total = state.seats.length * PRICE_PER_SEAT;
+
+    document.getElementById('sumMovie').textContent    = m ? m.title : '—';
+    document.getElementById('sumDate').textContent     = formatDate(s.date);
+    document.getElementById('sumTime').textContent     = s.time;
+    document.getElementById('sumHall').textContent     = 'Hall ' + s.hall;
+    document.getElementById('sumSeats').textContent    = state.seats.join(', ') + ` (${state.seats.length} seat${state.seats.length!==1?'s':''})`;
+    document.getElementById('sumName').textContent     = state.name;
+    document.getElementById('sumPhone').textContent    = state.phone;
+    document.getElementById('sumPriceEa').textContent  = formatCurrency(PRICE_PER_SEAT) + ' per seat';
+    document.getElementById('sumTotal').textContent    = formatCurrency(total);
+    document.getElementById('finalPriceEa').textContent = PRICE_PER_SEAT;
+
+    // Seat badges
+    document.getElementById('finalSeatsBadges').innerHTML =
+      state.seats.map(s => `<span class="ticket-seat-pill">${s}</span>`).join('');
+  }
+
+  // ── Step 6: Confirm ────────────────────────────────────
+  function confirmBooking() {
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+
+    setTimeout(() => {
+      const bookingId = generateBookingId();
+      const s = state.showtime;
+      const m = state.movie;
+
+      // Create booking record
+      const booking = {
+        id:           bookingId,
+        customerName: state.name,
+        phone:        state.phone,
+        movieId:      m.id,
+        movieTitle:   m.title,
+        showtimeId:   s.id,
+        date:         s.date,
+        time:         s.time,
+        hall:         s.hall,
+        seats:        [...state.seats],
+        amount:       state.seats.length * PRICE_PER_SEAT,
+        type:         'offline',
+        status:       'confirmed',
+        createdAt:    new Date().toISOString(),
+      };
+
+      // Save booking
+      const bookings = getBookings();
+      bookings.push(booking);
+      saveBookings(bookings);
+
+      // Update showtime's booked seats
+      const showtimes = getShowtimes();
+      const st = showtimes.find(x => x.id === s.id);
+      if (st) {
+        st.bookedSeats = [...(st.bookedSeats||[]), ...state.seats];
+        saveShowtimes(showtimes);
+      }
+
+      // Show success
+      document.getElementById('confirmedId').textContent = bookingId;
+      document.getElementById('printLink').href = `print-ticket.html?id=${bookingId}`;
+      goStep(6);
+      document.getElementById('progressSteps').style.display = 'none';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Booking';
+    }, 600);
+  }
+
+  // ── Reset ───────────────────────────────────────────────
+  function resetWizard() {
+    state = { movie: null, showtime: null, seats: [], name: '', phone: '' };
+    document.getElementById('movieSelect').value   = '';
+    document.getElementById('custName').value      = '';
+    document.getElementById('custPhone').value     = '';
+    document.getElementById('moviePreview').style.display = 'none';
+    document.getElementById('s1Next').disabled     = true;
+    document.getElementById('s4Next').disabled     = true;
+    document.getElementById('progressSteps').style.display = 'flex';
+    document.getElementById('resetBtn').style.display     = 'none';
+    goStep(1);
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  // Init
+  init();
+</script>
+</body>
+</html>
