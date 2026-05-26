@@ -205,118 +205,7 @@
   checkAuth();
   document.getElementById('topbarUser').textContent = getLoggedInUser();
 
-  // ── Load Stats ────────────────────────────────────────
-  function loadStats() {
-    const movies    = getMovies();
-    const bookings  = getBookings();
-    const showtimes = getShowtimes();
-    const today     = todayStr();
-
-    const todayBookings = bookings.filter(b => b.date === today);
-    const seatsToday    = todayBookings.reduce((s, b) => s + (b.seats ? b.seats.length : 0), 0);
-    const revenueToday  = todayBookings.reduce((s, b) => s + (Number(b.amount) || 0), 0);
-    const nowShowing    = movies.filter(m => m.status === 'now_showing').length;
-    const comingSoon    = movies.filter(m => m.status === 'coming_soon').length;
-
-    document.getElementById('statMovies').textContent    = movies.length;
-    document.getElementById('statMoviesSub').innerHTML   = `<span style="color:#22c55e">${nowShowing} showing</span> · ${comingSoon} coming soon`;
-    document.getElementById('statBookings').textContent  = todayBookings.length;
-    document.getElementById('statBookingsSub').innerHTML = todayBookings.filter(b=>b.status==='confirmed').length + ' confirmed';
-    document.getElementById('statSeats').textContent     = seatsToday;
-    document.getElementById('statSeatsSub').textContent  = 'across ' + (new Set(todayBookings.map(b=>b.showtimeId))).size + ' showtimes';
-    document.getElementById('statRevenue').textContent   = 'Nu. ' + revenueToday.toLocaleString();
-    document.getElementById('statRevenueSub').innerHTML  = todayBookings.length + ' transaction' + (todayBookings.length!==1?'s':'');
-  }
-
-  // ── Recent Bookings ───────────────────────────────────
-  function loadRecentBookings() {
-    const bookings = getBookings();
-    const recent   = [...bookings].reverse().slice(0, 8);
-    const tbody    = document.getElementById('recentBookingsTbody');
-
-    if (recent.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="table-empty"><i class="fas fa-ticket"></i>No bookings yet</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = recent.map(b => `
-      <tr>
-        <td>
-          <div class="td-bold">${esc(b.customerName)}</div>
-          <div style="font-size:11px;color:var(--text3)">${esc(b.phone)}</div>
-        </td>
-        <td style="max-width:160px">
-          <div style="font-size:12.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.movieTitle)}</div>
-        </td>
-        <td>
-          <div style="font-size:12px;white-space:nowrap">${formatDate(b.date)}</div>
-          <div style="font-size:11px;color:var(--text3)">${b.time} · Hall ${b.hall}</div>
-        </td>
-        <td>
-          <span style="font-weight:600;color:var(--text1)">${b.seats ? b.seats.join(', ') : '—'}</span>
-        </td>
-        <td><span style="color:var(--gold);font-weight:700">${formatCurrency(b.amount)}</span></td>
-        <td>${statusBadge(b.status)}</td>
-      </tr>`).join('');
-  }
-
-  // ── Now Showing ───────────────────────────────────────
-  function loadNowShowing() {
-    const movies = getMovies().filter(m => m.status === 'now_showing');
-    const el     = document.getElementById('nowShowingList');
-    if (movies.length === 0) {
-      el.innerHTML = `<p style="padding:16px 20px;color:var(--text3);font-size:12.5px">No movies currently showing.</p>`;
-      return;
-    }
-    el.innerHTML = movies.map(m => `
-      <div style="display:flex;align-items:center;gap:11px;padding:10px 18px;border-bottom:1px solid var(--border2)">
-        <img src="${esc(m.posterUrl)}" alt=""
-          style="width:30px;height:44px;object-fit:cover;border-radius:4px;flex-shrink:0"
-          onerror="this.style.display='none'">
-        <div style="min-width:0">
-          <div style="font-size:12.5px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.title)}</div>
-          <div style="font-size:11px;color:var(--text3)">${esc(m.genre)} · ${m.year || ''}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  // ── Today's Showtimes ─────────────────────────────────
-  function loadTodayShowtimes() {
-    const showtimes = getShowtimes().filter(s => s.date === todayStr());
-    const movies    = getMovies();
-    const tbody     = document.getElementById('todayShowtimesTbody');
-
-    if (showtimes.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="table-empty"><i class="fas fa-calendar"></i>No showtimes today</td></tr>`;
-      return;
-    }
-
-    const sorted = [...showtimes].sort((a, b) => a.time.localeCompare(b.time));
-    tbody.innerHTML = sorted.map(s => {
-      const movie   = movies.find(m => m.id === s.movieId) || {};
-      const booked  = s.bookedSeats ? s.bookedSeats.length : 0;
-      const avail   = s.totalSeats - booked;
-      const pct     = Math.round((booked / s.totalSeats) * 100);
-      const color   = pct >= 90 ? 'var(--accent)' : pct >= 60 ? 'var(--gold)' : '#22c55e';
-      return `
-        <tr>
-          <td class="td-bold">${esc(movie.title || 'Unknown')}</td>
-          <td><span style="font-weight:700;color:var(--text1)">${s.time}</span></td>
-          <td>Hall ${s.hall}</td>
-          <td>${s.totalSeats}</td>
-          <td style="color:var(--accent);font-weight:600">${booked}</td>
-          <td style="color:#22c55e;font-weight:600">${avail}</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="flex:1;height:6px;background:var(--border2);border-radius:3px;min-width:60px">
-                <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 0.4s"></div>
-              </div>
-              <span style="font-size:11.5px;color:${color};font-weight:600;flex-shrink:0">${pct}%</span>
-            </div>
-          </td>
-        </tr>`;
-    }).join('');
-  }
+  const API_BASE = 'https://drukcinema-api.onrender.com';
 
   // ── Escape HTML ───────────────────────────────────────
   function esc(s) {
@@ -326,6 +215,156 @@
   // ── Sidebar Toggle ────────────────────────────────────
   function openSidebar()  { document.getElementById('sidebar').classList.add('open');  document.getElementById('overlay').classList.add('open'); }
   function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  // ── Load Stats — fetch movies + bookings from API ─────
+  function loadStats() {
+    const today = todayStr();
+
+    Promise.all([
+      fetch(API_BASE + '/api/movies').then(r => r.json()),
+      fetch(API_BASE + '/api/bookings').then(r => r.json()),
+    ]).then(([moviesData, bookingsData]) => {
+      const movies   = Array.isArray(moviesData)   ? moviesData   : (moviesData.movies   || []);
+      const bookings = Array.isArray(bookingsData)  ? bookingsData : (bookingsData.bookings || []);
+
+      const todayBookings = bookings.filter(b => (b.date || '').startsWith(today));
+      const seatsToday    = todayBookings.reduce((s, b) => s + (Array.isArray(b.seats) ? b.seats.length : 0), 0);
+      const revenueToday  = todayBookings.reduce((s, b) => s + (Number(b.totalAmount || b.amount) || 0), 0);
+      const nowShowing    = movies.filter(m => m.status === 'now_showing').length;
+      const comingSoon    = movies.filter(m => m.status === 'coming_soon').length;
+
+      document.getElementById('statMovies').textContent    = movies.length;
+      document.getElementById('statMoviesSub').innerHTML   = `<span style="color:#22c55e">${nowShowing} showing</span> · ${comingSoon} coming soon`;
+      document.getElementById('statBookings').textContent  = todayBookings.length;
+      document.getElementById('statBookingsSub').innerHTML = todayBookings.filter(b => b.status === 'confirmed').length + ' confirmed';
+      document.getElementById('statSeats').textContent     = seatsToday;
+      document.getElementById('statSeatsSub').textContent  = 'across ' + (new Set(todayBookings.map(b => b.showtimeId).filter(Boolean))).size + ' showtimes';
+      document.getElementById('statRevenue').textContent   = 'Nu. ' + revenueToday.toLocaleString();
+      document.getElementById('statRevenueSub').innerHTML  = todayBookings.length + ' transaction' + (todayBookings.length !== 1 ? 's' : '');
+    }).catch(() => {
+      document.getElementById('statMovies').textContent   = '—';
+      document.getElementById('statBookings').textContent = '—';
+      document.getElementById('statSeats').textContent    = '—';
+      document.getElementById('statRevenue').textContent  = '—';
+    });
+  }
+
+  // ── Recent Bookings — fetch from API ──────────────────
+  function loadRecentBookings() {
+    const tbody = document.getElementById('recentBookingsTbody');
+    fetch(API_BASE + '/api/bookings')
+      .then(r => r.json())
+      .then(data => {
+        const bookings = Array.isArray(data) ? data : (data.bookings || []);
+        const recent   = [...bookings].reverse().slice(0, 8);
+        if (!recent.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="table-empty"><i class="fas fa-ticket"></i>No bookings yet</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = recent.map(b => `
+          <tr>
+            <td>
+              <div class="td-bold">${esc(b.customerName || b.userName || '—')}</div>
+              <div style="font-size:11px;color:var(--text3)">${esc(b.phone || b.email || '')}</div>
+            </td>
+            <td style="max-width:160px">
+              <div style="font-size:12.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                ${esc(b.movieTitle || b.movie || '—')}
+              </div>
+            </td>
+            <td>
+              <div style="font-size:12px;white-space:nowrap">${formatDate(b.date)}</div>
+              <div style="font-size:11px;color:var(--text3)">${esc(b.time || '')} · Hall ${esc(b.hall || '—')}</div>
+            </td>
+            <td>
+              <span style="font-weight:600;color:var(--text1)">${Array.isArray(b.seats) ? b.seats.join(', ') : '—'}</span>
+            </td>
+            <td><span style="color:var(--gold);font-weight:700">${formatCurrency(b.totalAmount || b.amount || 0)}</span></td>
+            <td>${statusBadge(b.status || 'confirmed')}</td>
+          </tr>`).join('');
+      })
+      .catch(() => {
+        tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Could not load bookings</td></tr>`;
+      });
+  }
+
+  // ── Now Showing — fetch from API ──────────────────────
+  function loadNowShowing() {
+    const el = document.getElementById('nowShowingList');
+    fetch(API_BASE + '/api/movies?status=now_showing')
+      .then(r => r.json())
+      .then(data => {
+        const movies = Array.isArray(data) ? data : (data.movies || []);
+        if (!movies.length) {
+          el.innerHTML = `<p style="padding:16px 20px;color:var(--text3);font-size:12.5px">No movies currently showing.</p>`;
+          return;
+        }
+        el.innerHTML = movies.map(m => `
+          <div style="display:flex;align-items:center;gap:11px;padding:10px 18px;border-bottom:1px solid var(--border2)">
+            <img src="${esc(m.posterUrl || m.poster || '')}" alt=""
+              style="width:30px;height:44px;object-fit:cover;border-radius:4px;flex-shrink:0"
+              onerror="this.style.display='none'">
+            <div style="min-width:0">
+              <div style="font-size:12.5px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.title)}</div>
+              <div style="font-size:11px;color:var(--text3)">
+                ${esc(Array.isArray(m.genres) ? m.genres.join('/') : (m.genre || ''))} · ${m.year || ''}
+              </div>
+            </div>
+          </div>`).join('');
+      })
+      .catch(() => {
+        el.innerHTML = `<p style="padding:16px 20px;color:var(--text3);font-size:12.5px">Could not load movies.</p>`;
+      });
+  }
+
+  // ── Today's Showtimes — fetch from API ────────────────
+  function loadTodayShowtimes() {
+    const tbody = document.getElementById('todayShowtimesTbody');
+    const today = todayStr();
+
+    Promise.all([
+      fetch(API_BASE + '/api/showtimes').then(r => r.json()),
+      fetch(API_BASE + '/api/movies').then(r => r.json()),
+    ]).then(([stData, mvData]) => {
+      const allShowtimes = Array.isArray(stData) ? stData : (stData.showtimes || []);
+      const movies       = Array.isArray(mvData)  ? mvData  : (mvData.movies   || []);
+      const showtimes    = allShowtimes.filter(s => s.date === today);
+
+      if (!showtimes.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty"><i class="fas fa-calendar"></i>No showtimes today</td></tr>`;
+        return;
+      }
+
+      const sorted = [...showtimes].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      tbody.innerHTML = sorted.map(s => {
+        const movie  = movies.find(m => (m._id || m.id) === s.movieId) || {};
+        const booked = (s.bookedSeats || []).length;
+        const total  = s.totalSeats || 80;
+        const avail  = total - booked;
+        const pct    = Math.round((booked / total) * 100);
+        const color  = pct >= 90 ? 'var(--accent)' : pct >= 60 ? 'var(--gold)' : '#22c55e';
+        return `
+          <tr>
+            <td class="td-bold">${esc(movie.title || 'Unknown')}</td>
+            <td><span style="font-weight:700;color:var(--text1)">${esc(s.time || '')}</span></td>
+            <td>Hall ${esc(s.hall || '—')}</td>
+            <td>${total}</td>
+            <td style="color:var(--accent);font-weight:600">${booked}</td>
+            <td style="color:#22c55e;font-weight:600">${avail}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="flex:1;height:6px;background:var(--border2);border-radius:3px;min-width:60px">
+                  <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 0.4s"></div>
+                </div>
+                <span style="font-size:11.5px;color:${color};font-weight:600;flex-shrink:0">${pct}%</span>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+    }).catch(() => {
+      tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Could not load showtimes</td></tr>`;
+    });
+  }
 
   // ── Init ──────────────────────────────────────────────
   loadStats();

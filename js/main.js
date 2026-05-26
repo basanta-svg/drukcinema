@@ -6,6 +6,11 @@
 'use strict';
 
 /* ─────────────────────────────────────────────────────────────
+   API CONFIGURATION
+───────────────────────────────────────────────────────────── */
+const API = 'https://drukcinema-api.onrender.com';
+
+/* ─────────────────────────────────────────────────────────────
    HERO MOVIE DATA
 ───────────────────────────────────────────────────────────── */
 const heroMovies = [
@@ -125,27 +130,9 @@ const MOVIE_DATA = {
   },
 };
 
-/* ── Merge admin-managed movies into MOVIE_DATA ─────────────
-   Admin panel saves movies to localStorage under 'drk_admin_movies'.
-   We merge them here so booking.html + search work automatically.
-───────────────────────────────────────────────────────────── */
-(function mergeAdminMovies() {
-  try {
-    var adminMs = JSON.parse(localStorage.getItem('drk_admin_movies') || '[]');
-    adminMs.forEach(function(m) {
-      MOVIE_DATA[m.id] = {
-        title:    m.title,
-        poster:   m.posterUrl || '',
-        rating:   parseFloat(((m.rating || 0) * 2).toFixed(1)),
-        duration: m.duration || '',
-        language: 'Dzongkha',
-        genres:   (m.genre || '').split('/').map(function(g) { return g.trim(); }),
-        trailer:  '',
-        desc:     m.description || '',
-      };
-    });
-  } catch (e) { /* silent — admin data unavailable */ }
-})();
+/* ── Movie data is now loaded from the API.
+   MOVIE_DATA above remains as an offline fallback for the
+   booking page and global search when the API is unreachable. ──── */
 
 /* All movies including coming soon — used by search */
 const ALL_MOVIES_SEARCH = [
@@ -331,10 +318,119 @@ const ALL_MOVIES_SEARCH = [
 })();
 
 /* ─────────────────────────────────────────────────────────────
-   MOVIES PAGE — search, filter, sort
+   INDEX PAGE — fetch now_showing & coming_soon from API
+   Populates #nowShowingTrack and #comingSoonTrack on index.html
+───────────────────────────────────────────────────────────── */
+(function initIndexCarousels() {
+  const nowTrack  = document.getElementById('nowShowingTrack');
+  const soonTrack = document.getElementById('comingSoonTrack');
+  if (!nowTrack && !soonTrack) return;
+
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function buildNowCard(m) {
+    const rating  = m.rating || 0;
+    const genres  = Array.isArray(m.genres) ? m.genres : (m.genre || '').split('/').map(g => g.trim()).filter(Boolean);
+    const tags    = genres.map(g => `<span class="genre-tag">${esc(g)}</span>`).join('');
+    const poster  = m.posterUrl || m.poster || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop';
+    const price   = m.price || 150;
+    const movieId = m._id || m.id;
+    return `
+      <div class="movie-card">
+        <div class="movie-poster-wrap">
+          <img src="${esc(poster)}" alt="${esc(m.title)}" loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop'">
+          <div class="card-badges">
+            <div class="rating-badge"><i class="fas fa-star"></i><span>${rating}</span></div>
+          </div>
+          <div class="movie-overlay">
+            <div class="overlay-soon-date"><i class="fas fa-star"></i> <span>${rating} / 10</span></div>
+            <a href="booking.html?id=${esc(movieId)}" class="overlay-btn overlay-btn-primary">
+              <i class="fas fa-ticket"></i> Book Now
+            </a>
+            <button class="overlay-btn overlay-btn-secondary">
+              <i class="fas fa-circle-info"></i> More Info
+            </button>
+          </div>
+        </div>
+        <div class="movie-info">
+          <h3>${esc(m.title)}</h3>
+          <div class="movie-genres">${tags}</div>
+          <p class="movie-meta-line">${esc(m.duration || '')}${m.duration && m.language ? ' · ' : ''}${esc(m.language || '')}</p>
+          <p class="movie-price">Nu. ${price}+</p>
+        </div>
+      </div>`;
+  }
+
+  function buildSoonCard(m) {
+    const genres  = Array.isArray(m.genres) ? m.genres : (m.genre || '').split('/').map(g => g.trim()).filter(Boolean);
+    const tags    = genres.map(g => `<span class="genre-tag">${esc(g)}</span>`).join('');
+    const poster  = m.posterUrl || m.poster || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop';
+    const release = m.releaseDate || m.release || 'Coming Soon';
+    return `
+      <div class="movie-card">
+        <div class="movie-poster-wrap">
+          <img src="${esc(poster)}" alt="${esc(m.title)}" loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop'">
+          <div class="card-badges">
+            <span class="soon-badge">Soon</span>
+          </div>
+          <div class="movie-overlay">
+            <div class="overlay-soon-date"><i class="fas fa-calendar"></i> <span>${esc(release)}</span></div>
+            <button class="overlay-btn overlay-btn-notify">
+              <i class="fas fa-bell"></i> Notify Me
+            </button>
+          </div>
+        </div>
+        <div class="movie-info">
+          <h3>${esc(m.title)}</h3>
+          <div class="movie-genres">${tags}</div>
+          <p class="movie-release"><i class="fas fa-calendar-days"></i> ${esc(release)}</p>
+        </div>
+      </div>`;
+  }
+
+  function updateSectionCount(track, count) {
+    const countEl = track.closest('.carousel-section')?.querySelector('.section-count');
+    if (countEl) countEl.textContent = `${count} film${count !== 1 ? 's' : ''}`;
+  }
+
+  if (nowTrack) {
+    fetch(`${API}/api/movies?status=now_showing`)
+      .then(r => r.json())
+      .then(data => {
+        const movies = Array.isArray(data) ? data : (data.movies || []);
+        if (!movies.length) return;
+        nowTrack.innerHTML = movies.map(buildNowCard).join('');
+        updateSectionCount(nowTrack, movies.length);
+      })
+      .catch(() => { /* Keep hardcoded fallback */ });
+  }
+
+  if (soonTrack) {
+    fetch(`${API}/api/movies?status=coming_soon`)
+      .then(r => r.json())
+      .then(data => {
+        const movies = Array.isArray(data) ? data : (data.movies || []);
+        if (!movies.length) return;
+        soonTrack.innerHTML = movies.map(buildSoonCard).join('');
+        updateSectionCount(soonTrack, movies.length);
+        /* Re-bind notify buttons after dynamic render */
+        document.querySelectorAll('#comingSoonTrack .overlay-btn-notify').forEach(btn => {
+          btn.dispatchEvent(new Event('drk:rebind'));
+        });
+      })
+      .catch(() => { /* Keep hardcoded fallback */ });
+  }
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   MOVIES PAGE — fetch from API, then filter / sort
 ───────────────────────────────────────────────────────────── */
 (function initMoviesPage() {
-  const grid       = document.getElementById('moviesGrid');
+  const grid = document.getElementById('moviesGrid');
   if (!grid) return;
 
   const filterBtns  = document.querySelectorAll('#filterBar .filter-btn');
@@ -349,9 +445,13 @@ const ALL_MOVIES_SEARCH = [
   let searchTerm  = '';
   let sortMode    = 'default';
 
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   function applyFilters() {
-    const cards   = Array.from(grid.querySelectorAll('.movie-card'));
-    let visible   = 0;
+    const cards = Array.from(grid.querySelectorAll('.movie-card'));
+    let visible = 0;
 
     cards.forEach(card => {
       const genre = (card.dataset.genre  || '').toLowerCase();
@@ -369,7 +469,6 @@ const ALL_MOVIES_SEARCH = [
     if (resultCount) resultCount.textContent = visible;
     if (noResults)   noResults.style.display = visible === 0 ? 'block' : 'none';
 
-    /* Sort visible */
     if (sortMode !== 'default') {
       const vis = cards.filter(c => !c.classList.contains('hidden'));
       vis.sort((a, b) => {
@@ -405,6 +504,101 @@ const ALL_MOVIES_SEARCH = [
     sortMode = this.value;
     applyFilters();
   });
+
+  /* ── Build a movie card HTML string from an API movie object ── */
+  function buildGridCard(m) {
+    const isNow    = m.status === 'now_showing';
+    const rating   = m.rating || 0;
+    const genres   = Array.isArray(m.genres) ? m.genres
+                     : (m.genre || '').split('/').map(g => g.trim()).filter(Boolean);
+    const genreData = genres.map(g => g.toLowerCase()).join(' ') + ' bhutanese';
+    const genreTags = genres.map(g => `<span class="genre-tag">${esc(g)}</span>`).join('');
+    const poster   = m.posterUrl || m.poster || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop';
+    const price    = m.price || 150;
+    const movieId  = m._id || m.id;
+    const release  = m.releaseDate || m.release || 'Coming Soon';
+
+    if (isNow) {
+      return `<div class="movie-card"
+          data-genre="${genreData}"
+          data-cat="now"
+          data-title="${esc(m.title.toLowerCase())}"
+          data-rating="${rating}"
+          data-price="${price}">
+          <div class="movie-poster-wrap">
+            <img src="${esc(poster)}" alt="${esc(m.title)}" loading="lazy"
+              onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop'">
+            <div class="card-badges">
+              <div class="rating-badge"><i class="fas fa-star"></i><span>${rating}</span></div>
+            </div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-star"></i> ${rating} / 10</div>
+              <a href="booking.html?id=${esc(movieId)}" class="overlay-btn overlay-btn-primary">
+                <i class="fas fa-ticket"></i> Book Now
+              </a>
+              <button class="overlay-btn overlay-btn-secondary">
+                <i class="fas fa-circle-info"></i> More Info
+              </button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>${esc(m.title)}</h3>
+            <div class="movie-genres">${genreTags}</div>
+            <p class="movie-meta-line">${esc(m.duration || '')}${m.duration && m.language ? ' · ' : ''}${esc(m.language || '')}</p>
+            <p class="movie-price">Nu. ${price}+</p>
+          </div>
+        </div>`;
+    } else {
+      return `<div class="movie-card"
+          data-genre="${genreData}"
+          data-cat="soon"
+          data-title="${esc(m.title.toLowerCase())}"
+          data-rating="0"
+          data-price="${price}">
+          <div class="movie-poster-wrap">
+            <img src="${esc(poster)}" alt="${esc(m.title)}" loading="lazy"
+              onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop'">
+            <div class="card-badges"><span class="soon-badge">Soon</span></div>
+            <div class="movie-overlay">
+              <div class="overlay-soon-date"><i class="fas fa-calendar"></i> ${esc(release)}</div>
+              <button class="overlay-btn overlay-btn-notify"><i class="fas fa-bell"></i> Notify Me</button>
+            </div>
+          </div>
+          <div class="movie-info">
+            <h3>${esc(m.title)}</h3>
+            <div class="movie-genres">${genreTags}</div>
+            <p class="movie-release"><i class="fas fa-calendar-days"></i> ${esc(release)}</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  /* ── Fetch all movies from API; fall back to hardcoded cards ── */
+  fetch(`${API}/api/movies`)
+    .then(r => r.json())
+    .then(data => {
+      const movies = Array.isArray(data) ? data : (data.movies || []);
+      if (!movies.length) { applyFilters(); return; }
+
+      const nowShowing = movies.filter(m => m.status === 'now_showing');
+      const comingSoon = movies.filter(m => m.status === 'coming_soon');
+
+      let html = nowShowing.map(buildGridCard).join('');
+      if (comingSoon.length) {
+        html += `<div class="section-divider-row">
+          <h3><i class="fas fa-hourglass-half"></i> Coming Soon</h3>
+        </div>`;
+        html += comingSoon.map(buildGridCard).join('');
+      }
+      grid.innerHTML = html;
+
+      if (resultCount) resultCount.textContent = movies.length;
+      applyFilters();
+    })
+    .catch(() => {
+      /* API unavailable — keep hardcoded cards and apply filters */
+      applyFilters();
+    });
 })();
 
 /* ─────────────────────────────────────────────────────────────
@@ -480,21 +674,35 @@ const ALL_MOVIES_SEARCH = [
   // selectedSeats: [{ id:'A1', price:500, cat:'recliner', catName:'RECLINER', dotColor:'#F5C518' }]
   let selectedSeats = [];
 
-  /* ── Load movie from URL ──────────────────────────────── */
+  /* ── Load movie from API (falls back to MOVIE_DATA) ─────── */
   (function loadMovie() {
     const rawId = new URLSearchParams(window.location.search).get('id') || '1';
-    const movie = MOVIE_DATA[rawId] || MOVIE_DATA[parseInt(rawId, 10)] || MOVIE_DATA[1];
     const set   = (sel, val, prop = 'textContent') => {
       const el = document.querySelector(sel);
       if (el) el[prop] = val;
     };
-    set('#bookingTitle',  movie.title);
-    set('#summaryTitle',  movie.title);
-    set('#bookingRating', movie.rating);
-    set('#bookingPoster', movie.poster, 'src');
-    set('#bookingPoster', movie.title,  'alt');
-    set('#summaryPoster', movie.poster, 'src');
-    set('#summaryPoster', movie.title,  'alt');
+
+    function applyMovie(movie) {
+      /* Store globally so confirmBtn handler can read it */
+      window._drkMovie = movie;
+      const poster = movie.posterUrl || movie.poster || '';
+      set('#bookingTitle',  movie.title);
+      set('#summaryTitle',  movie.title);
+      set('#bookingRating', movie.rating || '');
+      set('#bookingPoster', poster, 'src');
+      set('#bookingPoster', movie.title, 'alt');
+      set('#summaryPoster', poster, 'src');
+      set('#summaryPoster', movie.title, 'alt');
+    }
+
+    fetch(`${API}/api/movies/${encodeURIComponent(rawId)}`)
+      .then(r => r.json())
+      .then(data => applyMovie(data.movie || data))
+      .catch(() => {
+        /* Fallback to local static data */
+        const m = MOVIE_DATA[rawId] || MOVIE_DATA[parseInt(rawId, 10)] || MOVIE_DATA[1];
+        if (m) { m.posterUrl = m.posterUrl || m.poster; applyMovie(m); }
+      });
   })();
 
   /* ── Build seat map ───────────────────────────────────── */
@@ -754,72 +962,96 @@ const ALL_MOVIES_SEARCH = [
     confirmBtn.addEventListener('click', function () {
       if (selectedSeats.length === 0) return;
 
-      const ref   = 'DRK-' + Math.floor(100000 + Math.random() * 900000);
+      /* Disable button while processing */
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+
       const total = selectedSeats.reduce((s, x) => s + x.price, 0) + CONV_FEE;
 
       /* Gather show info */
-      const rawMovieId = new URLSearchParams(window.location.search).get('id') || '1';
-      const movie      = MOVIE_DATA[rawMovieId] || MOVIE_DATA[parseInt(rawMovieId, 10)] || MOVIE_DATA[1];
-
+      const rawMovieId     = new URLSearchParams(window.location.search).get('id') || '1';
+      const movie          = window._drkMovie || MOVIE_DATA[rawMovieId] || MOVIE_DATA[parseInt(rawMovieId, 10)] || MOVIE_DATA[1] || {};
       const activeDateChip = document.querySelector('#dateScroller .date-chip.active');
       const activeTimeChip = document.querySelector('#timeScroller .time-chip.active');
       const activeHallChip = document.querySelector('#hallSelector .hall-chip.active');
 
-      /* Use data-year if set by dynamic chips; fallback to current year */
       const dateYear = activeDateChip?.dataset?.year || new Date().getFullYear();
       const dateText = activeDateChip
         ? `${activeDateChip.querySelector('.dc-day').textContent}, ${activeDateChip.querySelector('.dc-num').textContent} ${activeDateChip.querySelector('.dc-mon').textContent} ${dateYear}`
         : 'Today';
-      const timeText = activeTimeChip ? activeTimeChip.dataset.time : '6:30 PM';
-      const hallText = activeHallChip ? activeHallChip.dataset.hall : 'Hall 1';
+      const timeText    = activeTimeChip ? activeTimeChip.dataset.time : '6:30 PM';
+      const hallText    = activeHallChip ? activeHallChip.dataset.hall : 'Hall 1';
+      const showtimeId  = activeTimeChip?.dataset?.showtimeId || '';
+      const isoDate     = activeDateChip?.dataset?.date || new Date().toISOString().split('T')[0];
 
-      /* Sort seats */
       const sorted = [...selectedSeats].sort((a, b) =>
         a.id[0].localeCompare(b.id[0]) || parseInt(a.id.slice(1)) - parseInt(b.id.slice(1))
       );
 
-      /* Populate e-ticket fields */
-      const setT = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      const setH = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
-      const setS = (id, val) => { const el = document.getElementById(id); if (el) el.src = val; };
+      /* Populate e-ticket and show modal */
+      function showTicket(ref) {
+        const setT = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        const setH = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+        const setS = (id, val) => { const el = document.getElementById(id); if (el) el.src = val; };
 
-      setT('etMovieTitle', movie.title);
-      setS('etPoster', movie.poster);
-      setT('etLangTag', movie.language || 'Dzongkha');
-      setT('etDate',   dateText);
-      setT('etTime',   timeText);
-      setT('etHall',   hallText);
-      setT('etRefCode', ref);
-      setT('etTotal',   `Nu. ${total}`);
-      setH('etSeatChips', sorted.map(s => `<span class="et-seat-chip">${s.id}</span>`).join(''));
+        setT('etMovieTitle', movie.title || '');
+        setS('etPoster',     movie.posterUrl || movie.poster || '');
+        setT('etLangTag',    movie.language || 'Dzongkha');
+        setT('etDate',       dateText);
+        setT('etTime',       timeText);
+        setT('etHall',       hallText);
+        setT('etRefCode',    ref);
+        setT('etTotal',      `Nu. ${total}`);
+        setH('etSeatChips',  sorted.map(s => `<span class="et-seat-chip">${s.id}</span>`).join(''));
 
-      /* QR Code */
-      const qrBox = document.getElementById('etQrBox');
-      if (qrBox) {
-        qrBox.innerHTML = '';
-        if (typeof QRCode !== 'undefined') {
-          new QRCode(qrBox, {
-            text: `DRUKCINEMA|${ref}|${sorted.map(s => s.id).join(',')}|${dateText}|${timeText}`,
-            width: 110, height: 110,
-            colorDark: '#000000', colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M,
-          });
-        } else {
-          qrBox.innerHTML = `<div style="width:110px;height:110px;background:#111;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;text-align:center;padding:8px;">${ref}</div>`;
+        const qrBox = document.getElementById('etQrBox');
+        if (qrBox) {
+          qrBox.innerHTML = '';
+          if (typeof QRCode !== 'undefined') {
+            new QRCode(qrBox, {
+              text: `DRUKCINEMA|${ref}|${sorted.map(s => s.id).join(',')}|${dateText}|${timeText}`,
+              width: 110, height: 110,
+              colorDark: '#000000', colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M,
+            });
+          } else {
+            qrBox.innerHTML = `<div style="width:110px;height:110px;background:#111;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;text-align:center;padding:8px;">${ref}</div>`;
+          }
         }
+
+        if (modalOverlay) modalOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+
+        /* Re-enable button */
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Confirm &amp; Pay';
       }
 
-      /* Save booking to localStorage */
-      const bookings = JSON.parse(localStorage.getItem('drkBookings') || '[]');
-      bookings.unshift({
-        id: ref, movie: movie.title, poster: movie.poster,
-        hall: hallText, date: dateText, time: timeText,
-        seats: sorted.map(s => s.id), total, status: 'confirmed',
-      });
-      localStorage.setItem('drkBookings', JSON.stringify(bookings));
-
-      if (modalOverlay) modalOverlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      /* POST booking to API */
+      fetch(`${API}/api/bookings`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          movieId:     rawMovieId,
+          showtimeId:  showtimeId,
+          seats:       sorted.map(s => s.id),
+          hall:        hallText,
+          date:        isoDate,
+          time:        timeText,
+          totalAmount: total,
+          movieTitle:  movie.title || '',
+        }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          const ref = data.bookingId || data.id || ('DRK-' + Math.floor(100000 + Math.random() * 900000));
+          showTicket(ref);
+        })
+        .catch(() => {
+          /* API unavailable — generate ref locally and still show ticket */
+          const ref = 'DRK-' + Math.floor(100000 + Math.random() * 900000);
+          showTicket(ref);
+        });
     });
   }
 
