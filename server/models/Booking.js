@@ -5,6 +5,7 @@ const BookingSchema = new mongoose.Schema({
   customerName:   String,
   phone:          String,
   email:          String,
+  user:           { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   movie:          { type: mongoose.Schema.Types.ObjectId, ref: 'Movie' },
   showtime:       { type: mongoose.Schema.Types.ObjectId, ref: 'Showtime' },
   seats:          [String],

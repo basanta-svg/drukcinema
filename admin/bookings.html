@@ -239,7 +239,7 @@
 
     tbody.innerHTML = slice.map(b => `
       <tr>
-        <td class="td-mono">${esc(b.id)}</td>
+        <td class="td-mono">${esc(b.bookingId || b.id)}</td>
         <td>
           <div class="td-bold">${esc(b.customerName)}</div>
           <div style="font-size:11px;color:var(--text3)">${esc(b.phone)}</div>
@@ -264,23 +264,25 @@
         <td>${statusBadge(b.status)}</td>
         <td style="text-align:right">
           <div style="display:flex;gap:5px;justify-content:flex-end;flex-wrap:nowrap">
-            ${b.status !== 'confirmed' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${b.id}','confirmed')" title="Confirm"><i class="fas fa-check"></i></button>` : ''}
-            ${b.status !== 'cancelled' ? `<button class="btn btn-danger btn-sm" onclick="updateStatus('${b.id}','cancelled')" title="Cancel"><i class="fas fa-ban"></i></button>` : ''}
-            <a href="print-ticket.html?id=${esc(b.id)}" class="btn btn-ghost btn-sm" title="Print Ticket"><i class="fas fa-print"></i></a>
+            ${b.status !== 'confirmed' ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${b._id}','confirmed')" title="Confirm"><i class="fas fa-check"></i></button>` : ''}
+            ${b.status !== 'cancelled' ? `<button class="btn btn-danger btn-sm" onclick="updateStatus('${b._id}','cancelled')" title="Cancel"><i class="fas fa-ban"></i></button>` : ''}
+            <a href="print-ticket.html?id=${esc(b.bookingId || b.id)}" class="btn btn-ghost btn-sm" title="Print Ticket"><i class="fas fa-print"></i></a>
           </div>
         </td>
       </tr>`).join('');
   }
 
-  function updateStatus(id, status) {
+  async function updateStatus(mongoId, status) {
     const action = status === 'confirmed' ? 'confirm' : 'cancel';
-    if (!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} booking ${id}?`)) return;
-    const bookings = getBookings();
-    const b = bookings.find(x => x.id === id);
-    if (b) { b.status = status; saveBookings(bookings); }
-    renderTable();
-    loadStats();
-    showToast(`Booking ${action}ed.`, status === 'confirmed' ? 'success' : 'info');
+    if (!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} this booking?`)) return;
+    try {
+      await updateBookingStatusApi(mongoId, status);
+      renderTable();
+      loadStats();
+      showToast(`Booking ${action}ed.`, status === 'confirmed' ? 'success' : 'info');
+    } catch (err) {
+      showToast('Update failed: ' + (err.message || 'Server error'), 'error');
+    }
   }
 
   function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
@@ -318,10 +320,10 @@
   function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
   function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-  // Init
-  populateMovieFilter();
-  loadStats();
-  renderTable();
+  // Init — load from API then render
+  Promise.all([loadMovies(), loadBookings()])
+    .then(() => { populateMovieFilter(); loadStats(); renderTable(); })
+    .catch(() => showToast('Could not load data from server.', 'error'));
 </script>
 </body>
 </html>

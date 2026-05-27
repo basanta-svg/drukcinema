@@ -259,7 +259,7 @@
     document.getElementById('showtimeForm').scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 
-  function saveShowtime() {
+  async function saveShowtime() {
     const movieId = document.getElementById('fMovie').value;
     const date    = document.getElementById('fDate').value;
     const time    = document.getElementById('fTime').value;
@@ -269,42 +269,38 @@
     if (!date)    { showToast('Please pick a date.', 'error');      return; }
     if (!time)    { showToast('Please set a time.', 'error');       return; }
 
-    const movies  = getMovies();
-    const movie   = movies.find(m => m.id === movieId);
-
-    const showtime = {
-      id:          editingId || uid('s'),
-      movieId,
-      movieTitle:  movie ? movie.title : '',
-      date,
-      time,
-      hall,
-      totalSeats:  parseInt(document.getElementById('fSeats').value) || HALL_SEATS[hall] || 80,
-      bookedSeats: editingId ? (getShowtimes().find(s=>s.id===editingId)?.bookedSeats||[]) : [],
-      price:       parseInt(document.getElementById('fPrice').value) || 150,
+    const payload = {
+      movieId, date, time, hall,
+      totalSeats: parseInt(document.getElementById('fSeats').value) || HALL_SEATS[hall] || 80,
+      price:      parseInt(document.getElementById('fPrice').value) || 150,
     };
 
-    const showtimes = getShowtimes();
-    if (editingId) {
-      const idx = showtimes.findIndex(s => s.id === editingId);
-      if (idx >= 0) showtimes[idx] = showtime;
-      showToast('Showtime updated!');
-    } else {
-      showtimes.push(showtime);
-      showToast('Showtime added!');
+    try {
+      if (editingId) {
+        await updateShowtimeApi(editingId, payload);
+        showToast('Showtime updated!');
+      } else {
+        await addShowtimeApi(payload);
+        showToast('Showtime added!');
+      }
+      resetForm();
+      renderTable();
+      updateCount();
+    } catch (err) {
+      showToast('Save failed: ' + (err.message || 'Server error'), 'error');
     }
-    saveShowtimes(showtimes);
-    resetForm();
-    renderTable();
-    updateCount();
   }
 
-  function deleteShowtime(id) {
+  async function deleteShowtime(id) {
     if (!confirm('Delete this showtime? Bookings for it will remain in the system.')) return;
-    saveShowtimes(getShowtimes().filter(s => s.id !== id));
-    renderTable();
-    updateCount();
-    showToast('Showtime deleted.', 'info');
+    try {
+      await deleteShowtimeApi(id);
+      renderTable();
+      updateCount();
+      showToast('Showtime deleted.', 'info');
+    } catch (err) {
+      showToast('Delete failed: ' + (err.message || 'Server error'), 'error');
+    }
   }
 
   function clearFilters() {
@@ -390,10 +386,10 @@
   function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
   function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-  // Init
-  populateMovieDropdowns();
-  renderTable();
-  updateCount();
+  // Init — load from API then render
+  Promise.all([loadMovies(), loadShowtimes()])
+    .then(() => { populateMovieDropdowns(); renderTable(); updateCount(); })
+    .catch(() => showToast('Could not load data from server.', 'error'));
 </script>
 </body>
 </html>

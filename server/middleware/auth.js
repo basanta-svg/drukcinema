@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 
+/* Strict — blocks request if no valid token */
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -16,4 +17,16 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken };
+/* Optional — attaches req.user if token present; never blocks */
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      req.user = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (e) { /* ignore invalid token */ }
+  }
+  next();
+};
+
+module.exports = { verifyToken, optionalAuth };

@@ -15,7 +15,7 @@ const API = 'https://drukcinema-api.onrender.com';
 ───────────────────────────────────────────────────────────── */
 const heroMovies = [
   {
-    id: 1,
+    id: '6a15e1f722fc561369cf172f',
     title:       'Lunana: A Yak in the Classroom',
     genres:      ['Drama', 'Adventure'],
     rating:      8.4,
@@ -26,7 +26,7 @@ const heroMovies = [
     price:       150,
   },
   {
-    id: 5,
+    id: '6a15e1f722fc561369cf1733',
     title:       "Dragon's Blessing",
     genres:      ['Action', 'Spiritual'],
     rating:      7.9,
@@ -37,7 +37,7 @@ const heroMovies = [
     price:       180,
   },
   {
-    id: 7,
+    id: '6a15e1f722fc561369cf1735',
     title:       "Tiger's Nest",
     genres:      ['Thriller', 'Spiritual'],
     rating:      7.7,
@@ -48,7 +48,7 @@ const heroMovies = [
     price:       150,
   },
   {
-    id: 8,
+    id: '6a15e1f722fc561369cf1736',
     title:       'Gross National Happiness',
     genres:      ['Documentary', 'Drama'],
     rating:      8.1,
@@ -134,9 +134,21 @@ const MOVIE_DATA = {
    MOVIE_DATA above remains as an offline fallback for the
    booking page and global search when the API is unreachable. ──── */
 
+/* MongoDB ObjectId map — translates numeric 1-8 to real IDs for search links */
+const MONGO_ID_MAP_SEARCH = {
+  '1': '6a15e1f722fc561369cf172f',
+  '2': '6a15e1f722fc561369cf1730',
+  '3': '6a15e1f722fc561369cf1731',
+  '4': '6a15e1f722fc561369cf1732',
+  '5': '6a15e1f722fc561369cf1733',
+  '6': '6a15e1f722fc561369cf1734',
+  '7': '6a15e1f722fc561369cf1735',
+  '8': '6a15e1f722fc561369cf1736',
+};
+
 /* All movies including coming soon — used by search */
 const ALL_MOVIES_SEARCH = [
-  ...Object.entries(MOVIE_DATA).map(([id, m]) => ({ id: parseInt(id), status: 'now', ...m })),
+  ...Object.entries(MOVIE_DATA).map(([id, m]) => ({ id: MONGO_ID_MAP_SEARCH[id] || id, status: 'now', ...m })),
   { id:9,  title:'Wangchuck: The Dragon King', poster:'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&h=600&fit=crop&q=80', rating:0, status:'soon', release:'June 2026',    genres:['Historical','Epic'],      desc:'An epic retelling of the unification of modern Bhutan under the first Dragon King.' },
   { id:10, title:'Bhutan Calling',             poster:'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=600&fit=crop&q=80', rating:0, status:'soon', release:'July 2026',    genres:['Comedy','Romance'],       desc:'A hilarious culture-clash comedy when a Bhutanese student returns from abroad.' },
   { id:11, title:'The Last Yak Herder',        poster:'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop&q=80', rating:0, status:'soon', release:'August 2026', genres:['Drama','Adventure'],      desc:'A dying tradition, a son\'s duty, and the vast Himalayan highlands.' },
@@ -149,7 +161,7 @@ const ALL_MOVIES_SEARCH = [
    AUTH STATE — show profile dropdown if logged in
 ───────────────────────────────────────────────────────────── */
 (function initNavAuth() {
-  const user = JSON.parse(localStorage.getItem('drkUser') || 'null');
+  const user = JSON.parse(localStorage.getItem('drukcinema_user') || 'null');
   if (!user) return;
 
   /* Wait for DOM then swap buttons */
@@ -161,8 +173,9 @@ const ALL_MOVIES_SEARCH = [
     const registerBtn = actions.querySelector('.nav-register-btn');
     if (!loginBtn) return;           // already replaced or not present
 
-    const initials  = ((user.firstName || '')[0] + (user.lastName || '')[0]).toUpperCase() || '?';
-    const firstName = user.firstName || 'Account';
+    const nameParts = (user.name || '').trim().split(/\s+/);
+    const initials  = nameParts.map(p => p[0] || '').join('').toUpperCase().slice(0, 2) || '?';
+    const firstName = nameParts[0] || 'Account';
 
     const wrap = document.createElement('div');
     wrap.className = 'nav-profile-wrap';
@@ -201,9 +214,26 @@ const ALL_MOVIES_SEARCH = [
       chev.classList.remove('rotated');
     });
 
+    /* Update mobile menu — hide Sign In / Register, show profile link + sign out */
+    const mobileActions = document.querySelector('.mobile-menu-actions');
+    if (mobileActions) {
+      mobileActions.innerHTML = `
+        <a href="profile.html" class="m-login"><i class="fas fa-user"></i> ${firstName}</a>
+        <button class="m-register" id="mobileNavSignOut" style="cursor:pointer;">Sign Out</button>`;
+      const mobileOut = document.getElementById('mobileNavSignOut');
+      if (mobileOut) {
+        mobileOut.addEventListener('click', function () {
+          localStorage.removeItem('drukcinema_token');
+          localStorage.removeItem('drukcinema_user');
+          window.location.href = 'index.html';
+        });
+      }
+    }
+
     /* Sign out */
     document.getElementById('navSignOut').addEventListener('click', function () {
-      localStorage.removeItem('drkUser');
+      localStorage.removeItem('drukcinema_token');
+      localStorage.removeItem('drukcinema_user');
       window.location.href = 'index.html';
     });
   }
@@ -682,6 +712,26 @@ const ALL_MOVIES_SEARCH = [
       if (el) el[prop] = val;
     };
 
+    /* ── Map legacy numeric IDs (1-8) to real MongoDB ObjectIds ──
+       Links from hardcoded HTML still use ?id=1 etc.
+       API-generated cards already use ?id=<24-char ObjectId>.       */
+    const MONGO_ID_MAP = {
+      '1': '6a15e1f722fc561369cf172f',   /* Lunana              */
+      '2': '6a15e1f722fc561369cf1730',   /* Travellers          */
+      '3': '6a15e1f722fc561369cf1731',   /* The Cup             */
+      '4': '6a15e1f722fc561369cf1732',   /* Hema Hema           */
+      '5': '6a15e1f722fc561369cf1733',   /* Dragon's Blessing   */
+      '6': '6a15e1f722fc561369cf1734',   /* Paro: Valley        */
+      '7': '6a15e1f722fc561369cf1735',   /* Tiger's Nest        */
+      '8': '6a15e1f722fc561369cf1736',   /* Gross Nat. Happiness*/
+    };
+
+    /* 24-char hex = already a MongoDB ObjectId; otherwise map or pass through */
+    const mongoId = (rawId.length === 24) ? rawId : (MONGO_ID_MAP[rawId] || rawId);
+
+    /* Expose MongoDB ID globally so confirmBtn and admin-bridge can use it */
+    window._drkMongoId = mongoId;
+
     function applyMovie(movie) {
       /* Store globally so confirmBtn handler can read it */
       window._drkMovie = movie;
@@ -695,7 +745,7 @@ const ALL_MOVIES_SEARCH = [
       set('#summaryPoster', movie.title, 'alt');
     }
 
-    fetch(`${API}/api/movies/${encodeURIComponent(rawId)}`)
+    fetch(`${API}/api/movies/${encodeURIComponent(mongoId)}`)
       .then(r => r.json())
       .then(data => applyMovie(data.movie || data))
       .catch(() => {
@@ -962,11 +1012,31 @@ const ALL_MOVIES_SEARCH = [
     confirmBtn.addEventListener('click', function () {
       if (selectedSeats.length === 0) return;
 
+      /* ── Auth gate: user must be logged in ────────────── */
+      const drkToken = localStorage.getItem('drukcinema_token');
+      const drkUser  = JSON.parse(localStorage.getItem('drukcinema_user') || 'null');
+
+      if (!drkToken || !drkUser) {
+        /* Save current booking state so user can return after login */
+        const rawId = new URLSearchParams(window.location.search).get('id') || '1';
+        sessionStorage.setItem('pendingBooking', JSON.stringify({
+          returnUrl: window.location.href,
+          movieId:   rawId,
+          seats:     selectedSeats.map(s => s.id),
+        }));
+        /* Show auth-gate modal */
+        const gate = document.getElementById('authGateOverlay');
+        if (gate) { gate.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        return;
+      }
+
       /* Disable button while processing */
       confirmBtn.disabled = true;
       confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
-      const total = selectedSeats.reduce((s, x) => s + x.price, 0) + CONV_FEE;
+      const subtotal = selectedSeats.reduce((s, x) => s + x.price, 0);
+      const conv     = Math.round(subtotal * 0.05);
+      const total    = subtotal + conv;
 
       /* Gather show info */
       const rawMovieId     = new URLSearchParams(window.location.search).get('id') || '1';
@@ -979,10 +1049,10 @@ const ALL_MOVIES_SEARCH = [
       const dateText = activeDateChip
         ? `${activeDateChip.querySelector('.dc-day').textContent}, ${activeDateChip.querySelector('.dc-num').textContent} ${activeDateChip.querySelector('.dc-mon').textContent} ${dateYear}`
         : 'Today';
-      const timeText    = activeTimeChip ? activeTimeChip.dataset.time : '6:30 PM';
-      const hallText    = activeHallChip ? activeHallChip.dataset.hall : 'Hall 1';
-      const showtimeId  = activeTimeChip?.dataset?.showtimeId || '';
-      const isoDate     = activeDateChip?.dataset?.date || new Date().toISOString().split('T')[0];
+      const timeText   = activeTimeChip ? activeTimeChip.dataset.time : '6:30 PM';
+      const hallText   = activeHallChip ? activeHallChip.dataset.hall : 'Hall 1';
+      const showtimeId = activeTimeChip?.dataset?.showtimeId || '';
+      const isoDate    = activeDateChip?.dataset?.date || new Date().toISOString().split('T')[0];
 
       const sorted = [...selectedSeats].sort((a, b) =>
         a.id[0].localeCompare(b.id[0]) || parseInt(a.id.slice(1)) - parseInt(b.id.slice(1))
@@ -991,8 +1061,8 @@ const ALL_MOVIES_SEARCH = [
       /* Populate e-ticket and show modal */
       function showTicket(ref) {
         const setT = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        const setH = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
-        const setS = (id, val) => { const el = document.getElementById(id); if (el) el.src = val; };
+        const setH = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML  = val; };
+        const setS = (id, val) => { const el = document.getElementById(id); if (el) el.src        = val; };
 
         setT('etMovieTitle', movie.title || '');
         setS('etPoster',     movie.posterUrl || movie.poster || '');
@@ -1027,30 +1097,60 @@ const ALL_MOVIES_SEARCH = [
         confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Confirm &amp; Pay';
       }
 
-      /* POST booking to API */
+      /* Show inline error below confirm button */
+      function showBookingError(msg) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Confirm &amp; Pay';
+        let errEl = document.getElementById('bookingErrorMsg');
+        if (!errEl) {
+          errEl = document.createElement('p');
+          errEl.id = 'bookingErrorMsg';
+          errEl.style.cssText = 'color:#f87171;font-size:12px;text-align:center;margin-top:10px;';
+          confirmBtn.parentNode.appendChild(errEl);
+        }
+        errEl.textContent = msg;
+        setTimeout(() => { if (errEl) errEl.textContent = ''; }, 6000);
+      }
+
+      /* ── POST booking to API ─────────────────────────── */
+      const headers = { 'Content-Type': 'application/json' };
+      if (drkToken) headers['Authorization'] = 'Bearer ' + drkToken;
+
+      const payload = {
+        customerName:    drkUser?.name  || 'Guest',
+        phone:           drkUser?.phone || 'N/A',
+        email:           drkUser?.email || 'N/A',
+        movie:           window._drkMongoId || rawMovieId,
+        showtimeId:      showtimeId,
+        seats:           sorted.map(s => s.id),
+        seatType:        selectedSeats[0]?.cat || 'classic',
+        amount:          subtotal,
+        convenienceFee:  conv,
+        totalAmount:     total,
+        type:            'online',
+        status:          'confirmed',
+      };
+
+      console.log('[DrukCinema] POST /api/bookings payload:', payload);
+
       fetch(`${API}/api/bookings`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          movieId:     rawMovieId,
-          showtimeId:  showtimeId,
-          seats:       sorted.map(s => s.id),
-          hall:        hallText,
-          date:        isoDate,
-          time:        timeText,
-          totalAmount: total,
-          movieTitle:  movie.title || '',
-        }),
+        headers: headers,
+        body:    JSON.stringify(payload),
       })
-        .then(r => r.json())
-        .then(data => {
+        .then(r => r.json().then(data => ({ ok: r.ok, status: r.status, data })))
+        .then(({ ok, data }) => {
+          console.log('[DrukCinema] booking response:', data);
+          if (!ok) {
+            showBookingError(data.error || 'Booking failed. Please try again.');
+            return;
+          }
           const ref = data.bookingId || data.id || ('DRK-' + Math.floor(100000 + Math.random() * 900000));
           showTicket(ref);
         })
-        .catch(() => {
-          /* API unavailable — generate ref locally and still show ticket */
-          const ref = 'DRK-' + Math.floor(100000 + Math.random() * 900000);
-          showTicket(ref);
+        .catch(err => {
+          console.error('[DrukCinema] booking error:', err);
+          showBookingError('Could not connect to server. Please check your connection and try again.');
         });
     });
   }
@@ -1389,7 +1489,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
       btn.addEventListener('click', function () {
         if (this.disabled) return;
-        const user = JSON.parse(localStorage.getItem('drkUser') || 'null');
+        const user = JSON.parse(localStorage.getItem('drukcinema_user') || 'null');
         if (!user) {
           showToastGlobal('Sign in to get notified about new releases!', 'error');
           setTimeout(() => { window.location.href = 'signin.html'; }, 1600);

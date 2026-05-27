@@ -549,55 +549,35 @@
   }
 
   // ── Step 6: Confirm ────────────────────────────────────
-  function confirmBooking() {
+  async function confirmBooking() {
     const btn = document.getElementById('confirmBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
-    setTimeout(() => {
-      const bookingId = generateBookingId();
-      const s = state.showtime;
-      const m = state.movie;
-
-      // Create booking record
-      const booking = {
-        id:           bookingId,
+    try {
+      const booking = await addBookingApi({
+        showtimeId:   state.showtime._id || state.showtime.id,
+        seats:        [...state.seats],
         customerName: state.name,
         phone:        state.phone,
-        movieId:      m.id,
-        movieTitle:   m.title,
-        showtimeId:   s.id,
-        date:         s.date,
-        time:         s.time,
-        hall:         s.hall,
-        seats:        [...state.seats],
+        seatType:     'classic',
         amount:       state.seats.length * PRICE_PER_SEAT,
         type:         'offline',
-        status:       'confirmed',
-        createdAt:    new Date().toISOString(),
-      };
+      });
 
-      // Save booking
-      const bookings = getBookings();
-      bookings.push(booking);
-      saveBookings(bookings);
+      // Refresh showtime cache so seat map stays accurate on next booking
+      await loadShowtimes();
 
-      // Update showtime's booked seats
-      const showtimes = getShowtimes();
-      const st = showtimes.find(x => x.id === s.id);
-      if (st) {
-        st.bookedSeats = [...(st.bookedSeats||[]), ...state.seats];
-        saveShowtimes(showtimes);
-      }
-
-      // Show success
-      document.getElementById('confirmedId').textContent = bookingId;
-      document.getElementById('printLink').href = `print-ticket.html?id=${bookingId}`;
+      document.getElementById('confirmedId').textContent = booking.id || booking.bookingId || '—';
+      document.getElementById('printLink').href = `print-ticket.html?id=${encodeURIComponent(booking.id || '')}`;
       goStep(6);
       document.getElementById('progressSteps').style.display = 'none';
+    } catch (err) {
+      showToast('Booking failed: ' + (err.message || 'Server error'), 'error');
+    } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Booking';
-    }, 600);
+    }
   }
 
   // ── Reset ───────────────────────────────────────────────
@@ -621,8 +601,10 @@
   function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open'); }
   function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-  // Init
-  init();
+  // Init — load movies + showtimes from API, then start wizard
+  Promise.all([loadMovies(), loadShowtimes()])
+    .then(() => init())
+    .catch(() => showToast('Could not load data from server.', 'error'));
 </script>
 </body>
 </html>

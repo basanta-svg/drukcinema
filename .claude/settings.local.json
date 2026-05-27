@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(nslookup -type=SRV _mongodb._tcp.drukcinema.bg5nday.mongodb.net 2>&1)",
+      "PowerShell(nslookup drukcinema.bg5nday.mongodb.net 2>&1)",
+      "PowerShell(Test-NetConnection -ComputerName \"drukcinema.bg5nday.mongodb.net\" -Port 27017 -InformationLevel Quiet 2>&1)",
+      "PowerShell(Test-NetConnection -ComputerName \"google.com\" -Port 443 -InformationLevel Quiet 2>&1)",
+      "PowerShell(nslookup drukcinema.bg5nday.mongodb.net 8.8.8.8 2>&1)",
+      "PowerShell(Get-NetAdapter | Where-Object {$_.Status -eq \"Up\"} | Select-Object Name, InterfaceDescription)",
+      "PowerShell(Set-DnsClientServerAddress -InterfaceAlias \"Wi-Fi\" -ServerAddresses \"8.8.8.8\",\"8.8.4.4\")",
+      "PowerShell(Get-DnsClientServerAddress -InterfaceAlias \"Wi-Fi\")",
+      "Bash(awk '/^<script/{p=1} p{print NR\": \"$0} /^<\\\\/script>/{p=0}' \"d:/Website templates/Project/DrukCinema/admin/movies.html\")",
+      "Bash(awk '/^<script/{p=1} p{print NR\": \"$0} /^<\\\\/script>/{p=0}' \"d:/Website templates/Project/DrukCinema/admin/bookings.html\")",
+      "Bash(awk '/^<script/{p=1} p{print NR\": \"$0} /^<\\\\/script>/{p=0}' \"d:/Website templates/Project/DrukCinema/admin/showtimes.html\")",
+      "Bash(awk '/^<script/{p=1} p{print NR\": \"$0} /^<\\\\/script>/{p=0}' \"d:/Website templates/Project/DrukCinema/admin/dashboard.html\")",
+      "Bash(awk '/^<script/{p=1} p{print NR\": \"$0} /^<\\\\/script>/{p=0}' \"d:/Website templates/Project/DrukCinema/admin/offline-booking.html\")",
+      "Bash(awk 'NR>=400 && NR<=530' \"d:/Website templates/Project/DrukCinema/admin/offline-booking.html\")",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:5000/api/movies\" -UseBasicParsing; $r.StatusCode; \\($r.Content | ConvertFrom-Json\\)[0..1] | ForEach-Object { \"$\\($_.title\\) [$\\($_.status\\)] rating=$\\($_.rating\\)\" })"
+    ]
+  }
+}

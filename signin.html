@@ -581,28 +581,12 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">WhatsApp Number</label>
-          <div class="fp-phone-row" id="siPhoneRow">
-            <select class="fp-cc-select" id="siCountryCode" aria-label="Country code">
-              <option value="+975" selected>🇧🇹 +975</option>
-              <option value="+91">🇮🇳 +91</option>
-              <option value="+977">🇳🇵 +977</option>
-              <option value="+86">🇨🇳 +86</option>
-              <option value="+1">🇺🇸 +1</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="+61">🇦🇺 +61</option>
-              <option value="+65">🇸🇬 +65</option>
-              <option value="+81">🇯🇵 +81</option>
-              <option value="+49">🇩🇪 +49</option>
-              <option value="+971">🇦🇪 +971</option>
-            </select>
-            <input type="tel" class="fp-phone-input" id="siPhone"
-              placeholder="17 123 456" maxlength="15" inputmode="numeric"
-              autocomplete="tel">
-          </div>
-          <div class="field-error" id="siPhoneError">
+          <label class="form-label" for="siEmail">Email Address</label>
+          <input type="email" class="form-input" id="siEmail"
+            placeholder="you@example.com" autocomplete="email">
+          <div class="field-error" id="siEmailError">
             <i class="fas fa-circle-exclamation"></i>
-            Please enter a valid phone number.
+            Please enter a valid email address.
           </div>
         </div>
 
@@ -619,6 +603,11 @@
             <i class="fas fa-circle-exclamation"></i>
             Password must be at least 6 characters.
           </div>
+        </div>
+
+        <div class="field-error" id="siGeneralError" style="justify-content:center;margin-bottom:6px;">
+          <i class="fas fa-circle-exclamation"></i>
+          <span id="siGeneralErrorMsg">Invalid email or password.</span>
         </div>
 
         <button class="auth-btn" id="signInBtn">
@@ -720,6 +709,26 @@
             </div>
             <span class="strength-label" id="strengthLabel">Weak</span>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regConfirmPw">Confirm Password</label>
+          <div class="pw-wrap">
+            <input type="password" class="form-input" id="regConfirmPw"
+              placeholder="Repeat password" autocomplete="new-password">
+            <button class="pw-toggle" id="regConfirmPwToggle" type="button" aria-label="Show confirm password">
+              <i class="fas fa-eye" id="regConfirmPwIcon"></i>
+            </button>
+          </div>
+          <div class="field-error" id="regConfirmPwError">
+            <i class="fas fa-circle-exclamation"></i>
+            Passwords do not match.
+          </div>
+        </div>
+
+        <div class="field-error" id="regGeneralError" style="justify-content:center;margin-bottom:6px;">
+          <i class="fas fa-circle-exclamation"></i>
+          <span id="regGeneralErrorMsg">Registration failed.</span>
         </div>
 
         <button class="auth-btn" id="registerBtn">
@@ -914,6 +923,8 @@
 <script>
 'use strict';
 
+const SIGNIN_API = 'https://drukcinema-api.onrender.com';
+
 /* ── Tab switching ─────────────────────────────────────── */
 const authTabs   = document.querySelectorAll('.auth-tab');
 const authPanels = document.querySelectorAll('.auth-panel');
@@ -927,6 +938,14 @@ authTabs.forEach(tab => {
   });
 });
 
+/* Open register tab if URL has ?tab=register */
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'register') {
+    document.querySelector('[data-panel="register"]').click();
+  }
+})();
+
 /* Switch links */
 document.getElementById('switchToRegister').addEventListener('click', function (e) {
   e.preventDefault();
@@ -939,9 +958,9 @@ document.getElementById('switchToSignIn').addEventListener('click', function (e)
 
 /* ── Password visibility toggles ───────────────────────── */
 function bindPwToggle(btnId, iconId, inputId) {
-  const btn = document.getElementById(btnId);
+  const btn  = document.getElementById(btnId);
   const icon = document.getElementById(iconId);
-  const inp = document.getElementById(inputId);
+  const inp  = document.getElementById(inputId);
   if (!btn) return;
   btn.addEventListener('click', () => {
     const show = inp.type === 'password';
@@ -949,11 +968,12 @@ function bindPwToggle(btnId, iconId, inputId) {
     icon.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
   });
 }
-bindPwToggle('siPwToggle', 'siPwIcon', 'siPw');
-bindPwToggle('regPwToggle', 'regPwIcon', 'regPw');
+bindPwToggle('siPwToggle',          'siPwIcon',          'siPw');
+bindPwToggle('regPwToggle',         'regPwIcon',         'regPw');
+bindPwToggle('regConfirmPwToggle',  'regConfirmPwIcon',  'regConfirmPw');
 
 /* ── Password strength ─────────────────────────────────── */
-const regPw       = document.getElementById('regPw');
+const regPw        = document.getElementById('regPw');
 const strengthWrap = document.getElementById('strengthWrap');
 const strengthFill = document.getElementById('strengthFill');
 const strengthLbl  = document.getElementById('strengthLabel');
@@ -968,9 +988,9 @@ regPw.addEventListener('input', function () {
   if (/[0-9]/.test(v))         score++;
   if (/[^A-Za-z0-9]/.test(v))  score++;
   const levels = [
-    { w: '25%',  bg: '#ef4444', lbl: 'Weak' },
-    { w: '50%',  bg: '#f97316', lbl: 'Fair' },
-    { w: '75%',  bg: '#eab308', lbl: 'Good' },
+    { w: '25%',  bg: '#ef4444', lbl: 'Weak'   },
+    { w: '50%',  bg: '#f97316', lbl: 'Fair'   },
+    { w: '75%',  bg: '#eab308', lbl: 'Good'   },
     { w: '100%', bg: '#22c55e', lbl: 'Strong' },
   ];
   const m = levels[Math.max(0, score - 1)];
@@ -980,115 +1000,160 @@ regPw.addEventListener('input', function () {
   strengthLbl.style.color       = m.bg;
 });
 
-/* ── Sign In ───────────────────────────────────────────── */
-document.getElementById('signInBtn').addEventListener('click', function () {
-  const cc       = document.getElementById('siCountryCode').value;
-  const num      = document.getElementById('siPhone').value.replace(/\D/g, '');
+/* ── Shared: save session + redirect after login/register ─ */
+function handleAuthSuccess(token, user) {
+  localStorage.setItem('drukcinema_token', token);
+  localStorage.setItem('drukcinema_user',  JSON.stringify(user));
+
+  /* Check for pending booking */
+  const pending = sessionStorage.getItem('pendingBooking');
+  if (pending) {
+    try {
+      const pb = JSON.parse(pending);
+      sessionStorage.removeItem('pendingBooking');
+      window.location.href = pb.returnUrl || 'index.html';
+      return;
+    } catch(e) { /* fall through */ }
+  }
+
+  /* Redirect to previous page or home */
+  const ref = document.referrer;
+  const isSelf = ref.includes('signin.html') || !ref;
+  window.location.href = (!isSelf && ref) ? ref : 'index.html';
+}
+
+/* ── Sign In (email + password) ────────────────────────── */
+document.getElementById('signInBtn').addEventListener('click', async function () {
+  const email    = document.getElementById('siEmail').value.trim();
   const pw       = document.getElementById('siPw').value;
-  const phoneErr = document.getElementById('siPhoneError');
+  const emailErr = document.getElementById('siEmailError');
   const pwErr    = document.getElementById('siPwError');
+  const genErr   = document.getElementById('siGeneralError');
+  const genErrMsg = document.getElementById('siGeneralErrorMsg');
   let valid = true;
 
-  if (!num || num.length < 6) {
-    phoneErr.classList.add('show'); valid = false;
-  } else { phoneErr.classList.remove('show'); }
+  emailErr.classList.remove('show');
+  pwErr.classList.remove('show');
+  genErr.classList.remove('show');
 
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+    emailErr.classList.add('show'); valid = false;
+  }
   if (!pw || pw.length < 6) {
     pwErr.classList.add('show'); valid = false;
-  } else { pwErr.classList.remove('show'); }
-
+  }
   if (!valid) return;
-
-  const fullPhone = cc + ' ' + num;
 
   this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
   this.disabled  = true;
-  setTimeout(() => {
-    localStorage.setItem('drkUser', JSON.stringify({
-      firstName:  'User',
-      lastName:   '',
-      email:      '',
-      phone:      fullPhone,
-      joinedDate: new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
-    }));
+
+  try {
+    const res  = await fetch(SIGNIN_API + '/api/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password: pw }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      genErrMsg.textContent = data.error || 'Invalid email or password.';
+      genErr.classList.add('show');
+      this.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+      this.disabled  = false;
+      return;
+    }
+
     showToast('Welcome back! Redirecting…');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1600);
-  }, 1200);
+    setTimeout(() => handleAuthSuccess(data.token, data.user), 800);
+  } catch (err) {
+    genErrMsg.textContent = 'Could not connect to server. Please try again.';
+    genErr.classList.add('show');
+    this.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+    this.disabled  = false;
+  }
 });
 
 /* ── Register ──────────────────────────────────────────── */
-document.getElementById('registerBtn').addEventListener('click', function () {
-  const first = document.getElementById('regFirst').value.trim();
-  const last  = document.getElementById('regLast').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const phone = document.getElementById('regPhone').value.trim();
-  const pw    = document.getElementById('regPw').value;
-  const emailErr = document.getElementById('regEmailError');
-
+document.getElementById('registerBtn').addEventListener('click', async function () {
+  const first      = document.getElementById('regFirst').value.trim();
+  const last       = document.getElementById('regLast').value.trim();
+  const email      = document.getElementById('regEmail').value.trim();
+  const cc         = document.getElementById('regCountryCode').value;
+  const phone      = document.getElementById('regPhone').value.replace(/\D/g, '');
+  const pw         = document.getElementById('regPw').value;
+  const confirmPw  = document.getElementById('regConfirmPw').value;
+  const emailErr   = document.getElementById('regEmailError');
+  const confirmErr = document.getElementById('regConfirmPwError');
+  const genErr     = document.getElementById('regGeneralError');
+  const genErrMsg  = document.getElementById('regGeneralErrorMsg');
   let valid = true;
+
+  emailErr.classList.remove('show');
+  confirmErr.classList.remove('show');
+  genErr.classList.remove('show');
+
   if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
     emailErr.classList.add('show'); valid = false;
-  } else { emailErr.classList.remove('show'); }
-
-  if (!first || !last || !pw || pw.length < 6) {
-    showToast('Please fill all required fields correctly.', 'error');
-    valid = false;
   }
-
+  if (pw !== confirmPw) {
+    confirmErr.classList.add('show'); valid = false;
+  }
+  if (!first || !pw || pw.length < 6) {
+    genErrMsg.textContent = !first ? 'First name is required.' : 'Password must be at least 6 characters.';
+    genErr.classList.add('show'); valid = false;
+  }
   if (!valid) return;
+
+  const fullPhone = phone ? `${cc} ${phone}` : '';
+  const fullName  = [first, last].filter(Boolean).join(' ');
 
   this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account…';
   this.disabled  = true;
-  setTimeout(() => {
-    /* Save session to localStorage */
-    localStorage.setItem('drkUser', JSON.stringify({
-      firstName:  first,
-      lastName:   last,
-      email:      email,
-      phone:      phone,
-      joinedDate: new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
-    }));
+
+  try {
+    const res  = await fetch(SIGNIN_API + '/api/auth/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ name: fullName, email, phone: fullPhone, password: pw }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      genErrMsg.textContent = data.error || 'Registration failed. Please try again.';
+      genErr.classList.add('show');
+      this.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+      this.disabled  = false;
+      return;
+    }
+
     showToast('Account created! Welcome to DrukCinema 🎉');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1800);
-  }, 1400);
+    setTimeout(() => handleAuthSuccess(data.token, data.user), 900);
+  } catch (err) {
+    genErrMsg.textContent = 'Could not connect to server. Please try again.';
+    genErr.classList.add('show');
+    this.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+    this.disabled  = false;
+  }
 });
 
 /* ── NDI Sign In ───────────────────────────────────────── */
 document.getElementById('siNdiBtn').addEventListener('click', function () {
-  const orig = this.innerHTML;
   this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to NDI…';
   this.disabled = true;
   setTimeout(() => {
-    /* Simulate NDI verified user */
-    localStorage.setItem('drkUser', JSON.stringify({
-      firstName:  'NDI',
-      lastName:   'User',
-      email:      'ndi@bhutan.gov.bt',
-      phone:      '+975 17000000',
-      ndi:        true,
-      joinedDate: new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
-    }));
-    showToast('NDI verified! Welcome back 🇧🇹');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+    /* NDI simulation — stores as drukcinema_user without a real token */
+    const mockUser = { id: 'ndi-user', name: 'NDI User', email: 'ndi@bhutan.gov.bt', phone: '+975 17000000', role: 'user', ndi: true };
+    handleAuthSuccess('ndi-mock-token', mockUser);
   }, 1800);
 });
 
 /* ── NDI Register ──────────────────────────────────────── */
 document.getElementById('regNdiBtn').addEventListener('click', function () {
-  const orig = this.innerHTML;
   this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to NDI…';
   this.disabled = true;
   setTimeout(() => {
-    localStorage.setItem('drkUser', JSON.stringify({
-      firstName:  'NDI',
-      lastName:   'Registered',
-      email:      'ndi@bhutan.gov.bt',
-      phone:      '+975 17000000',
-      ndi:        true,
-      joinedDate: new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
-    }));
-    showToast('NDI registration complete! Welcome to DrukCinema 🇧🇹🎉');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1800);
+    const mockUser = { id: 'ndi-user', name: 'NDI Registered', email: 'ndi@bhutan.gov.bt', phone: '+975 17000000', role: 'user', ndi: true };
+    handleAuthSuccess('ndi-mock-token', mockUser);
   }, 1800);
 });
 

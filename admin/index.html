@@ -84,13 +84,14 @@
 
 <script src="admin.js"></script>
 <script>
-  // If already logged in, go straight to dashboard
+  // If already logged in (with valid token), go straight to dashboard
   (function() {
     const a = JSON.parse(localStorage.getItem('drk_admin_auth') || 'null');
-    if (a && a.loggedIn) window.location.href = 'dashboard.html';
+    const t = localStorage.getItem('drk_admin_token');
+    if (a && a.loggedIn && t) window.location.href = 'dashboard.html';
   })();
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value;
@@ -101,8 +102,9 @@
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
     btn.disabled  = true;
 
-    setTimeout(() => {
-      if (adminLogin(u, p)) {
+    try {
+      const success = await adminLogin(u, p);
+      if (success) {
         btn.innerHTML = '<i class="fas fa-check"></i> Success!';
         btn.style.background = '#22c55e';
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
@@ -115,7 +117,13 @@
         document.getElementById('password').value = '';
         document.getElementById('password').focus();
       }
-    }, 500);
+    } catch {
+      document.getElementById('loginErrorMsg').textContent =
+        'Cannot reach server. Make sure the API is running on port 5000.';
+      err.classList.add('show');
+      btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+      btn.disabled  = false;
+    }
   }
 
   function togglePassword() {

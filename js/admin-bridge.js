@@ -24,6 +24,8 @@
 
   /* ── API base — inherit from main.js or define locally ──── */
   var BASE = (typeof API !== 'undefined') ? API : 'https://drukcinema-api.onrender.com';
+  function _adminToken() { return localStorage.getItem('drk_admin_token') || ''; }
+  function _authHdr()    { var t = _adminToken(); return t ? { 'Content-Type':'application/json','Authorization':'Bearer '+t } : { 'Content-Type':'application/json' }; }
 
   function esc(s) {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -46,20 +48,21 @@
     addMovie: function (payload) {
       return fetch(BASE + '/api/movies', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: _authHdr(),
         body: JSON.stringify(payload),
       }).then(function (r) { return r.json(); });
     },
     updateMovie: function (id, payload) {
       return fetch(BASE + '/api/movies/' + encodeURIComponent(id), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: _authHdr(),
         body: JSON.stringify(payload),
       }).then(function (r) { return r.json(); });
     },
     deleteMovie: function (id) {
       return fetch(BASE + '/api/movies/' + encodeURIComponent(id), {
         method: 'DELETE',
+        headers: _authHdr(),
       }).then(function (r) { return r.json(); });
     },
 

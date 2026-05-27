@@ -327,7 +327,7 @@
     document.getElementById('movieForm').scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 
-  function saveMovie() {
+  async function saveMovie() {
     const title  = document.getElementById('fTitle').value.trim();
     const genre  = document.getElementById('fGenre').value;
     const rating = parseInt(document.getElementById('fRating').value) || 0;
@@ -337,39 +337,39 @@
     if (!genre) { showToast('Please select a genre.', 'error'); return; }
 
     const movie = {
-      id:          editingId || uid('m'),
-      title,
-      genre,
-      rating:      rating,
+      title, genre, rating,
       duration:    document.getElementById('fDuration').value.trim() || '',
-      year:        parseInt(document.getElementById('fYear').value) || null,
       description: document.getElementById('fDesc').value.trim(),
       posterUrl:   document.getElementById('fPoster').value.trim(),
       status,
     };
 
-    const movies = getMovies();
-    if (editingId) {
-      const idx = movies.findIndex(m => m.id === editingId);
-      if (idx >= 0) movies[idx] = movie;
-      showToast('Movie updated successfully!');
-    } else {
-      movies.push(movie);
-      showToast('Movie added successfully!');
+    try {
+      if (editingId) {
+        await updateMovieApi(editingId, movie);
+        showToast('Movie updated successfully!');
+      } else {
+        await addMovieApi(movie);
+        showToast('Movie added successfully!');
+      }
+      resetForm();
+      renderTable();
+      updateCount();
+    } catch (err) {
+      showToast('Save failed: ' + (err.message || 'Server error'), 'error');
     }
-    saveMovies(movies);
-    resetForm();
-    renderTable();
-    updateCount();
   }
 
-  function deleteMovie(id) {
+  async function deleteMovie(id) {
     if (!confirm('Delete this movie? Associated showtimes will remain.')) return;
-    const movies = getMovies().filter(m => m.id !== id);
-    saveMovies(movies);
-    renderTable();
-    updateCount();
-    showToast('Movie deleted.', 'info');
+    try {
+      await deleteMovieApi(id);
+      renderTable();
+      updateCount();
+      showToast('Movie deleted.', 'info');
+    } catch (err) {
+      showToast('Delete failed: ' + (err.message || 'Server error'), 'error');
+    }
   }
 
   function renderTable() {
@@ -550,9 +550,10 @@
     showToast('Poster selected from media library.', 'info');
   }
 
-  // Init
-  renderTable();
-  updateCount();
+  // Init — load from API then render
+  loadMovies()
+    .then(() => { renderTable(); updateCount(); })
+    .catch(() => showToast('Could not load movies from server.', 'error'));
 </script>
 </body>
 </html>
