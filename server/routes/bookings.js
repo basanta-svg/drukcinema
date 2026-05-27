@@ -2,6 +2,7 @@ const express         = require('express');
 const Booking         = require('../models/Booking');
 const Showtime        = require('../models/Showtime');
 const { verifyToken, optionalAuth } = require('../middleware/auth');
+const { sendBookingConfirmation } = require('../utils/emailService');
 const router          = express.Router();
 
 /* Generate DRK-XXXXXX booking ID */
@@ -129,6 +130,12 @@ router.post('/', optionalAuth, async (req, res) => {
     ]);
 
     console.log('[POST /api/bookings] created:', booking.bookingId);
+
+    // Send confirmation email (non-blocking — don't fail booking if email fails)
+    sendBookingConfirmation(populated).catch(e =>
+      console.error('[Email] Booking confirmation error:', e.message)
+    );
+
     res.status(201).json(populated);
   } catch (err) {
     console.error('[POST /api/bookings] error:', err.message);

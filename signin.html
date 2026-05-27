@@ -776,7 +776,7 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════
-     FORGOT PASSWORD OVERLAY (3-step: Email → 2FA OTP → New PW)
+     FORGOT PASSWORD OVERLAY — Email Reset
 ═════════════════════════════════════════════════════════ -->
 <div class="fp-overlay" id="fpOverlay" role="dialog" aria-modal="true" aria-label="Reset password">
   <div class="fp-card">
@@ -784,51 +784,28 @@
     <!-- Close X -->
     <button class="fp-close" id="fpClose" aria-label="Close"><i class="fas fa-times"></i></button>
 
-    <!-- Progress dots -->
-    <div class="fp-progress">
-      <div class="fp-dot active" id="fpDot1"></div>
-      <div class="fp-dot"       id="fpDot2"></div>
-      <div class="fp-dot"       id="fpDot3"></div>
-    </div>
-
-    <!-- ─── Step 1: WhatsApp Phone ─── -->
+    <!-- ─── Email input step ─── -->
     <div class="fp-step active" id="fpStep1">
-      <div class="fp-icon-ring whatsapp"><i class="fab fa-whatsapp" style="font-size:26px;"></i></div>
-      <h3>Reset via WhatsApp</h3>
-      <p class="fp-sub">Enter your registered phone number and we'll send a <strong>6-digit code</strong> on WhatsApp.</p>
-
-      <div style="display:flex;justify-content:center;margin-bottom:18px;">
-        <span class="wa-badge"><i class="fab fa-whatsapp"></i> WhatsApp OTP</span>
-      </div>
+      <div class="fp-icon-ring blue"><i class="fas fa-envelope"></i></div>
+      <h3>Forgot Password?</h3>
+      <p class="fp-sub">Enter your registered email and we'll send you a <strong>password reset link</strong>.</p>
 
       <div class="form-group">
-        <label class="form-label">WhatsApp Number</label>
-        <div class="fp-phone-row">
-          <select class="fp-cc-select" id="fpCountryCode" aria-label="Country code">
-            <option value="+975" selected>🇧🇹 +975</option>
-            <option value="+91">🇮🇳 +91</option>
-            <option value="+977">🇳🇵 +977</option>
-            <option value="+86">🇨🇳 +86</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+61">🇦🇺 +61</option>
-            <option value="+65">🇸🇬 +65</option>
-            <option value="+81">🇯🇵 +81</option>
-            <option value="+49">🇩🇪 +49</option>
-            <option value="+971">🇦🇪 +971</option>
-          </select>
-          <input type="tel" class="fp-phone-input" id="fpPhone"
-            placeholder="17 123 456" maxlength="15" inputmode="numeric"
-            autocomplete="tel">
-        </div>
-        <div class="field-error" id="fpPhoneError">
-          <i class="fas fa-circle-exclamation"></i> Please enter a valid phone number.
+        <label class="form-label" for="fpEmail">Email Address</label>
+        <input type="email" class="form-input" id="fpEmail"
+          placeholder="you@example.com" autocomplete="email">
+        <div class="field-error" id="fpEmailError">
+          <i class="fas fa-circle-exclamation"></i> Please enter a valid email address.
         </div>
       </div>
 
-      <button class="auth-btn" id="fpSendCodeBtn"
-        style="background:linear-gradient(135deg,#128c7e,#25d366);">
-        <i class="fab fa-whatsapp"></i> Send WhatsApp Code
+      <div class="field-error" id="fpGeneralError" style="justify-content:center;margin-bottom:10px;">
+        <i class="fas fa-circle-exclamation"></i>
+        <span id="fpGeneralErrorMsg">Something went wrong.</span>
+      </div>
+
+      <button class="auth-btn" id="fpSendLinkBtn">
+        <i class="fas fa-paper-plane"></i> Send Reset Link
       </button>
 
       <button class="fp-back" id="fpBack1">
@@ -836,85 +813,30 @@
       </button>
     </div>
 
-    <!-- ─── Step 2: WhatsApp OTP Verification ─── -->
-    <div class="fp-step" id="fpStep2">
-      <div class="fp-icon-ring whatsapp"><i class="fab fa-whatsapp" style="font-size:26px;"></i></div>
-      <h3>Enter WhatsApp Code</h3>
-      <p class="fp-sub" id="fpOtpSub">A 6-digit code was sent to your WhatsApp <strong id="fpPhoneDisplay">—</strong>. Enter it below to continue.</p>
+    <!-- ─── Success step ─── -->
+    <div class="fp-step" id="fpStep2" style="text-align:center;">
+      <div class="fp-icon-ring green" style="margin:0 auto 18px;"><i class="fas fa-envelope-circle-check"></i></div>
+      <h3>Check Your Email</h3>
+      <p class="fp-sub">
+        We've sent a reset link to<br>
+        <strong id="fpEmailDisplay" style="color:#F5C518;word-break:break-all;">—</strong>
+      </p>
+      <p class="fp-sub" style="font-size:12px;margin-top:8px;">
+        The link expires in <strong style="color:#F5C518;">1 hour</strong>.<br>
+        Check your spam folder if you don't see it.
+      </p>
 
-      <div class="otp-row" id="otpRow">
-        <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" aria-label="Digit 1">
-        <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 2">
-        <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 3">
-        <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 4">
-        <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 5">
-        <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 6">
-      </div>
+      <button class="auth-btn" id="fpDoneBtn" style="margin-top:8px;">
+        <i class="fas fa-arrow-right-to-bracket"></i> Back to Sign In
+      </button>
 
-      <div class="fp-resend-row">
-        Didn't get the WhatsApp message?
-        <button class="fp-resend-btn" id="fpResendBtn" disabled>
-          Resend in <span class="fp-timer" id="fpTimer">60</span>s
+      <p style="font-size:12px;color:var(--muted);margin-top:14px;">
+        Didn't get it?
+        <button id="fpResendLinkBtn" type="button"
+          style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;padding:0;">
+          Resend email
         </button>
-      </div>
-
-      <div class="field-error" id="fpOtpError" style="justify-content:center;margin-bottom:14px;">
-        <i class="fas fa-circle-exclamation"></i> Invalid code. Please try again.
-      </div>
-
-      <button class="auth-btn" id="fpVerifyBtn">
-        <i class="fas fa-check-shield"></i> Verify Code
-      </button>
-
-      <button class="fp-back" id="fpBack2">
-        <i class="fas fa-arrow-left"></i> Back
-      </button>
-    </div>
-
-    <!-- ─── Step 3: Set New Password ─── -->
-    <div class="fp-step" id="fpStep3">
-      <div class="fp-icon-ring green"><i class="fas fa-lock"></i></div>
-      <h3>Set New Password</h3>
-      <p class="fp-sub">Choose a strong password for your DrukCinema account.</p>
-
-      <div class="form-group">
-        <label class="form-label" for="fpNewPw">New Password</label>
-        <div class="pw-wrap">
-          <input type="password" class="form-input" id="fpNewPw"
-            placeholder="Min. 8 characters" autocomplete="new-password">
-          <button class="pw-toggle" id="fpNewPwToggle" type="button" aria-label="Show password">
-            <i class="fas fa-eye" id="fpNewPwIcon"></i>
-          </button>
-        </div>
-        <div class="strength-bar-wrap" id="fpStrengthWrap" style="display:none;">
-          <div class="strength-bar-track">
-            <div class="strength-bar-fill" id="fpStrengthFill"></div>
-          </div>
-          <span class="strength-label" id="fpStrengthLabel">Weak</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="fpConfirmPw">Confirm Password</label>
-        <div class="pw-wrap">
-          <input type="password" class="form-input" id="fpConfirmPw"
-            placeholder="Repeat new password" autocomplete="new-password">
-          <button class="pw-toggle" id="fpConfirmPwToggle" type="button" aria-label="Show password">
-            <i class="fas fa-eye" id="fpConfirmPwIcon"></i>
-          </button>
-        </div>
-        <div class="field-error" id="fpPwMatchError">
-          <i class="fas fa-circle-exclamation"></i> Passwords do not match.
-        </div>
-      </div>
-
-      <button class="auth-btn" id="fpResetBtn">
-        <i class="fas fa-key"></i> Reset Password
-      </button>
-
-      <button class="fp-back" id="fpBack3">
-        <i class="fas fa-arrow-left"></i> Back
-      </button>
+      </p>
     </div>
 
   </div><!-- /fp-card -->
@@ -1170,41 +1092,33 @@ function showToast(msg, type = 'success') {
 }
 
 /* ═══════════════════════════════════════════════════════
-   FORGOT PASSWORD — 3-STEP: Email → 2FA OTP → New Password
+   FORGOT PASSWORD — Email Reset Link
 ═══════════════════════════════════════════════════════ */
 (function initForgotPassword() {
   const overlay    = document.getElementById('fpOverlay');
   const closeBtn   = document.getElementById('fpClose');
   const triggerBtn = document.getElementById('forgotPwLink');
-
-  /* Steps */
-  const steps = [
-    document.getElementById('fpStep1'),
-    document.getElementById('fpStep2'),
-    document.getElementById('fpStep3'),
-  ];
-  const dots  = [
-    document.getElementById('fpDot1'),
-    document.getElementById('fpDot2'),
-    document.getElementById('fpDot3'),
-  ];
-
-  let currentStep   = 0;
-  let fpUserPhone   = '';   /* full number e.g. "+975 17123456" */
-  let fpCorrectOtp  = '';
-  let resendTimer   = null;
+  const step1      = document.getElementById('fpStep1');
+  const step2      = document.getElementById('fpStep2');
 
   /* ── Open / close overlay ── */
   function openOverlay() {
-    goToStep(0);
+    step1.classList.add('active');
+    step2.classList.remove('active');
+    document.getElementById('fpEmail').value = '';
+    document.getElementById('fpEmailError').classList.remove('show');
+    document.getElementById('fpGeneralError').classList.remove('show');
+    const btn = document.getElementById('fpSendLinkBtn');
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+    btn.disabled  = false;
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('fpPhone').focus(), 160);
+    setTimeout(function () { document.getElementById('fpEmail').focus(); }, 160);
   }
+
   function closeOverlay() {
     overlay.classList.remove('open');
     document.body.style.overflow = '';
-    clearInterval(resendTimer);
   }
 
   triggerBtn.addEventListener('click', openOverlay);
@@ -1214,243 +1128,74 @@ function showToast(msg, type = 'success') {
     if (e.key === 'Escape' && overlay.classList.contains('open')) closeOverlay();
   });
 
-  /* ── Navigate between steps ── */
-  function goToStep(n) {
-    steps.forEach((s, i) => s.classList.toggle('active', i === n));
-    dots.forEach((d, i) => {
-      d.classList.toggle('active', i === n);
-      d.classList.toggle('done', i < n);
-    });
-    currentStep = n;
-  }
-
   /* ── Back buttons ── */
   document.getElementById('fpBack1').addEventListener('click', closeOverlay);
-  document.getElementById('fpBack2').addEventListener('click', () => goToStep(0));
-  document.getElementById('fpBack3').addEventListener('click', () => goToStep(1));
+  document.getElementById('fpDoneBtn').addEventListener('click', closeOverlay);
 
-  /* ─────────────────────────────────────────────────────
-     STEP 1 — Send code
-  ───────────────────────────────────────────────────── */
-  document.getElementById('fpSendCodeBtn').addEventListener('click', function () {
-    const cc     = document.getElementById('fpCountryCode').value;
-    const num    = document.getElementById('fpPhone').value.replace(/\D/g, '');
-    const errEl  = document.getElementById('fpPhoneError');
+  /* ── Send reset link ── */
+  async function sendResetLink(email) {
+    const emailErr = document.getElementById('fpEmailError');
+    const genErr   = document.getElementById('fpGeneralError');
+    const genErrMsg = document.getElementById('fpGeneralErrorMsg');
+    const btn      = document.getElementById('fpSendLinkBtn');
 
-    if (!num || num.length < 6) {
-      errEl.classList.add('show'); return;
+    emailErr.classList.remove('show');
+    genErr.classList.remove('show');
+
+    if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+      emailErr.classList.add('show');
+      return;
     }
-    errEl.classList.remove('show');
 
-    fpUserPhone  = cc + ' ' + num;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+    btn.disabled  = true;
 
-    /* Simulate — generate a fake 6-digit OTP */
-    fpCorrectOtp = String(Math.floor(100000 + Math.random() * 900000));
-
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
-    this.disabled  = true;
-
-    setTimeout(() => {
-      this.innerHTML = '<i class="fab fa-whatsapp"></i> Send WhatsApp Code';
-      this.disabled  = false;
-
-      /* Show the full phone number in Step 2 */
-      const displayEl = document.getElementById('fpPhoneDisplay');
-      if (displayEl) displayEl.textContent = fpUserPhone;
-
-      /* Demo: reveal OTP in console + toast */
-      console.info(`[DrukCinema demo] WhatsApp OTP → ${fpCorrectOtp}`);
-      showToast(`WhatsApp code sent to ${fpUserPhone}! (Demo code: ${fpCorrectOtp})`);
-
-      /* Clear OTP boxes */
-      document.querySelectorAll('.otp-box').forEach(b => { b.value = ''; b.classList.remove('filled'); });
-
-      goToStep(1);
-      startResendTimer();
-      setTimeout(() => document.querySelector('.otp-box').focus(), 120);
-    }, 1500);
-  });
-
-  /* ─────────────────────────────────────────────────────
-     STEP 2 — OTP input
-  ───────────────────────────────────────────────────── */
-  const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
-
-  otpBoxes.forEach((box, i) => {
-    /* Auto-advance on digit input */
-    box.addEventListener('input', function () {
-      const v = this.value.replace(/\D/g, '');
-      this.value = v.slice(-1);
-      this.classList.toggle('filled', this.value !== '');
-      document.getElementById('fpOtpError').classList.remove('show');
-      if (v && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
-    });
-
-    /* Handle backspace — go to previous */
-    box.addEventListener('keydown', function (e) {
-      if (e.key === 'Backspace' && !this.value && i > 0) {
-        otpBoxes[i - 1].focus();
-        otpBoxes[i - 1].value = '';
-        otpBoxes[i - 1].classList.remove('filled');
-      }
-    });
-
-    /* Handle paste — fill all boxes */
-    box.addEventListener('paste', function (e) {
-      e.preventDefault();
-      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
-      otpBoxes.forEach((b, j) => {
-        b.value = pasted[j] || '';
-        b.classList.toggle('filled', !!b.value);
+    try {
+      const res  = await fetch(SIGNIN_API + '/api/auth/forgot-password', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email }),
       });
-      const focusIdx = Math.min(pasted.length, otpBoxes.length - 1);
-      otpBoxes[focusIdx].focus();
-    });
-  });
+      const data = await res.json();
 
-  document.getElementById('fpVerifyBtn').addEventListener('click', function () {
-    const entered = otpBoxes.map(b => b.value).join('');
-    const errEl   = document.getElementById('fpOtpError');
+      if (!res.ok) {
+        genErrMsg.textContent = data.error || 'Failed to send reset email. Please try again.';
+        genErr.classList.add('show');
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+        btn.disabled  = false;
+        return;
+      }
 
-    if (entered.length < 6) {
-      errEl.textContent = 'Please enter the complete 6-digit code.';
-      errEl.classList.add('show'); return;
+      /* Show success step */
+      document.getElementById('fpEmailDisplay').textContent = email;
+      step1.classList.remove('active');
+      step2.classList.add('active');
+
+    } catch (err) {
+      genErrMsg.textContent = 'Network error. Please try again.';
+      genErr.classList.add('show');
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+      btn.disabled  = false;
     }
-
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying…';
-    this.disabled  = true;
-
-    setTimeout(() => {
-      this.innerHTML = '<i class="fas fa-check-shield"></i> Verify Code';
-      this.disabled  = false;
-
-      if (entered === fpCorrectOtp) {
-        errEl.classList.remove('show');
-        clearInterval(resendTimer);
-        showToast('Identity verified! Set your new password.');
-        goToStep(2);
-        setTimeout(() => document.getElementById('fpNewPw').focus(), 120);
-      } else {
-        errEl.textContent = 'Incorrect code. Please try again.';
-        errEl.classList.add('show');
-        /* Shake boxes */
-        otpBoxes.forEach(b => {
-          b.animate(
-            [{ transform:'translateX(-4px)' }, { transform:'translateX(4px)' },
-             { transform:'translateX(-3px)' }, { transform:'translateX(0)' }],
-            { duration: 280 }
-          );
-        });
-      }
-    }, 1000);
-  });
-
-  /* Resend countdown */
-  function startResendTimer() {
-    const timerEl  = document.getElementById('fpTimer');
-    const resendBtn = document.getElementById('fpResendBtn');
-    let seconds    = 60;
-    clearInterval(resendTimer);
-    resendBtn.disabled = true;
-    resendBtn.innerHTML = `Resend in <span class="fp-timer" id="fpTimer">${seconds}</span>s`;
-
-    resendTimer = setInterval(() => {
-      seconds--;
-      const tEl = document.getElementById('fpTimer');
-      if (tEl) tEl.textContent = seconds;
-      if (seconds <= 0) {
-        clearInterval(resendTimer);
-        resendBtn.disabled = false;
-        resendBtn.innerHTML = 'Resend Code';
-      }
-    }, 1000);
   }
 
-  document.getElementById('fpResendBtn').addEventListener('click', function () {
-    if (this.disabled) return;
-    fpCorrectOtp = String(Math.floor(100000 + Math.random() * 900000));
-    console.info(`[DrukCinema demo] New WhatsApp OTP → ${fpCorrectOtp}`);
-    showToast(`New WhatsApp code sent to ${fpUserPhone}! (Demo: ${fpCorrectOtp})`);
-    otpBoxes.forEach(b => { b.value = ''; b.classList.remove('filled'); });
-    document.getElementById('fpOtpError').classList.remove('show');
-    startResendTimer();
-    otpBoxes[0].focus();
+  document.getElementById('fpSendLinkBtn').addEventListener('click', function () {
+    sendResetLink(document.getElementById('fpEmail').value.trim());
   });
 
-  /* ─────────────────────────────────────────────────────
-     STEP 3 — New password
-  ───────────────────────────────────────────────────── */
-  /* Password visibility toggles */
-  function bindFpToggle(btnId, iconId, inputId) {
-    const btn  = document.getElementById(btnId);
-    const icon = document.getElementById(iconId);
-    const inp  = document.getElementById(inputId);
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      const show = inp.type === 'password';
-      inp.type = show ? 'text' : 'password';
-      icon.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
-    });
-  }
-  bindFpToggle('fpNewPwToggle', 'fpNewPwIcon', 'fpNewPw');
-  bindFpToggle('fpConfirmPwToggle', 'fpConfirmPwIcon', 'fpConfirmPw');
-
-  /* Strength meter */
-  const fpNewPw      = document.getElementById('fpNewPw');
-  const fpSwrap      = document.getElementById('fpStrengthWrap');
-  const fpSfill      = document.getElementById('fpStrengthFill');
-  const fpSlabel     = document.getElementById('fpStrengthLabel');
-  fpNewPw.addEventListener('input', function () {
-    const v = this.value;
-    if (!v) { fpSwrap.style.display = 'none'; return; }
-    fpSwrap.style.display = 'block';
-    let score = 0;
-    if (v.length >= 8)           score++;
-    if (/[A-Z]/.test(v))         score++;
-    if (/[0-9]/.test(v))         score++;
-    if (/[^A-Za-z0-9]/.test(v))  score++;
-    const lvls = [
-      { w:'25%',  bg:'#ef4444', lbl:'Weak' },
-      { w:'50%',  bg:'#f97316', lbl:'Fair' },
-      { w:'75%',  bg:'#eab308', lbl:'Good' },
-      { w:'100%', bg:'#22c55e', lbl:'Strong' },
-    ];
-    const m = lvls[Math.max(0, score - 1)];
-    fpSfill.style.width      = m.w;
-    fpSfill.style.background = m.bg;
-    fpSlabel.textContent     = m.lbl;
-    fpSlabel.style.color     = m.bg;
+  /* Enter key on email field */
+  document.getElementById('fpEmail').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') sendResetLink(this.value.trim());
   });
 
-  document.getElementById('fpResetBtn').addEventListener('click', function () {
-    const pw   = document.getElementById('fpNewPw').value;
-    const conf = document.getElementById('fpConfirmPw').value;
-    const errEl = document.getElementById('fpPwMatchError');
-
-    if (!pw || pw.length < 8) {
-      errEl.textContent = 'Password must be at least 8 characters.';
-      errEl.classList.add('show'); return;
-    }
-    if (pw !== conf) {
-      errEl.textContent = 'Passwords do not match.';
-      errEl.classList.add('show'); return;
-    }
-    errEl.classList.remove('show');
-
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting…';
-    this.disabled  = true;
-
-    setTimeout(() => {
-      /* In a real app: PATCH /api/auth/reset-password */
-      closeOverlay();
-      showToast('Password reset successfully! Please sign in. 🎉');
-      /* Switch to sign-in tab */
-      document.querySelector('[data-panel="signin"]').click();
-      document.getElementById('fpNewPw').value    = '';
-      document.getElementById('fpConfirmPw').value = '';
-      this.innerHTML = '<i class="fas fa-key"></i> Reset Password';
-      this.disabled  = false;
-    }, 1400);
+  /* ── Resend (goes back to step 1 and re-sends) ── */
+  document.getElementById('fpResendLinkBtn').addEventListener('click', function () {
+    step2.classList.remove('active');
+    step1.classList.add('active');
+    const btn = document.getElementById('fpSendLinkBtn');
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+    btn.disabled  = false;
+    setTimeout(function () { document.getElementById('fpEmail').focus(); }, 80);
   });
 
 })(); /* end initForgotPassword */
