@@ -13,6 +13,7 @@
   <!-- Favicon -->
   <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/mobile.css">
 
   <style>
     body { background: var(--bg-primary); }
@@ -189,10 +190,42 @@
     .partner-chip:hover { border-color: rgba(255,255,255,0.2); color: white; }
     .partner-chip i { font-size: 16px; }
 
-    /* Responsive */
-    @media (max-width: 700px) {
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .offers-hero { padding: 90px 0 40px; }
+      .offers-hero h1 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+      .offers-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
       .offer-card-wide { flex-direction: column; }
       .offer-wide-art  { width: 100%; height: 120px; }
+      .offer-wide-actions { flex-direction: column; gap: 8px; }
+      .offer-wide-actions .btn { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+      .offers-hero { padding: 76px 0 32px; }
+      .offers-hero h1 { font-size: 1.6rem; }
+      .offers-hero p  { font-size: 13px; }
+      .offers-filter-bar {
+        flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch; gap: 6px;
+      }
+      .of-tab { flex-shrink: 0; padding: 7px 14px; font-size: 12px; }
+      .offers-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .offer-card-wide { grid-column: auto; }
+      .offer-wide-art  { height: 90px; font-size: 48px; }
+      .offer-wide-body { padding: 18px 16px; }
+      .offer-wide-body h3 { font-size: 1.1rem; }
+      .promo-box { flex-wrap: nowrap; }
+      .promo-code { font-size: 13px; letter-spacing: 1px; padding: 10px 12px; }
+      .partners-row { gap: 8px; }
+      .partner-chip { padding: 8px 12px; font-size: 12px; gap: 7px; }
+      .offer-card-body { padding: 14px 16px; }
+    }
+    @media (max-width: 360px) {
+      .offers-hero h1 { font-size: 1.4rem; }
+      .partner-chip   { font-size: 11px; padding: 7px 10px; }
     }
   </style>
 </head>

@@ -513,6 +513,25 @@
       .back-link { top: 22px; left: 20px; }
       .auth-footer { position: static; margin-top: 32px; }
     }
+
+    /* ── Mobile: touch-friendliness + form improvements ── */
+    .auth-btn,
+    .auth-tab,
+    .ndi-btn { min-height: 44px; }
+
+    @media (max-width: 480px) {
+      .auth-form-panel { padding: 70px 16px 40px; }
+      .auth-card { width: 100%; }
+      .name-row { flex-direction: column; gap: 0; }
+      .name-row .form-group { flex: none; width: 100%; }
+      .form-input { width: 100%; font-size: 16px; /* prevents iOS zoom */ }
+      .phone-group { flex-wrap: nowrap; }
+      .country-code-select { min-width: 90px; }
+      .auth-tab { font-size: 13px; padding: 10px 12px; }
+      .fp-card { padding: 28px 16px; }
+      .otp-row { gap: 5px; }
+      .otp-box { width: 38px; height: 46px; font-size: 18px; }
+    }
   </style>
 </head>
 <body>

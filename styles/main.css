@@ -204,7 +204,7 @@ h1,h2,h3,h4,h5,h6 {
 /* ── Hero Banner ───────────────────────────────────────────── */
 .hero {
   position:relative; width:100%;
-  height:90vh; min-height:580px; max-height:800px;
+  height:95vh; min-height:640px; max-height:920px;
   overflow:hidden;
 }
 .hero-slide {
@@ -242,9 +242,9 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 .hero-title {
-  font-size:clamp(2rem,5vw,3.6rem);
+  font-size:clamp(1.5rem,3.5vw,2.6rem);
   font-weight:900; color:white;
-  line-height:1.08; margin-bottom:18px;
+  line-height:1.1; margin-bottom:18px;
 }
 
 .hero-meta {
@@ -1633,3 +1633,12 @@ body.light-mode .footer { background:#1a1a1a; }
 @media (max-width:768px) {
   .mobile-menu-inner a { font-size:15px; padding:13px 0; }
 }
+
+/* ── iOS: prevent input zoom (font-size must be ≥16px) ── */
+@media (max-width:480px) {
+  input, select, textarea { font-size:16px; }
+}
+
+/* ── Booking page: confirm button touch target ── */
+.book-btn,
+.confirm-btn { min-height:44px; }

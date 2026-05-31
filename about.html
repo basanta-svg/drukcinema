@@ -13,6 +13,7 @@
   <!-- Favicon -->
   <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/mobile.css">
 
   <style>
     body { background: var(--bg-primary); }
@@ -308,9 +309,33 @@
       .cf-row       { grid-template-columns: 1fr; }
       .cinemas-about-grid { grid-template-columns: 1fr 1fr; }
     }
+    @media (max-width: 480px) {
+      .about-hero { padding: 80px 0 32px; }
+      .about-hero h1 { font-size: 1.75rem; }
+      .about-hero p { font-size: 14px; }
+      .about-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .about-stat .as-val { font-size: 1.6rem; }
+      .about-section { padding: 40px 0; }
+      .values-grid  { grid-template-columns: 1fr; gap: 12px; }
+      .team-grid    { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .team-card    { padding: 18px 14px; }
+      .team-avatar  { width: 56px; height: 56px; font-size: 22px; }
+      .contact-grid { grid-template-columns: 1fr; gap: 20px; }
+      .contact-info-card, .contact-form-card { padding: 20px; }
+      .cinemas-about-grid { grid-template-columns: 1fr; }
+      .faq-question { font-size: 13px; padding: 14px 16px; }
+      .as-grid-2 { gap: 20px; }
+    }
     @media (max-width: 400px) {
       .cinemas-about-grid { grid-template-columns: 1fr; }
       .team-grid { grid-template-columns: 1fr 1fr; }
+      .about-stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 360px) {
+      .about-hero h1 { font-size: 1.5rem; }
+      .about-stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .about-stat .as-val { font-size: 1.3rem; }
+      .team-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>

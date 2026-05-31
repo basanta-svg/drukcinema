@@ -106,8 +106,10 @@
      BOOKING PAGE — load showtimes from API → date/time chips
   ══════════════════════════════════════════════════════════ */
   function bridgeBookingPage() {
+    /* Support new calendar widget and legacy date-chip strip */
+    var calWrap      = document.getElementById('bookingCalendarWrap');
     var dateScroller = document.getElementById('dateScroller');
-    if (!dateScroller) return;
+    if (!calWrap && !dateScroller) return;
 
     var movieId = new URLSearchParams(window.location.search).get('id') || '';
     if (!movieId) return;
@@ -123,56 +125,103 @@
             return d !== 0 ? d : a.time.localeCompare(b.time);
           });
 
-        /* No API showtimes — let the inline date fallback script run */
         if (!showtimes.length) return;
 
-        window._drkBridge = { showtimes: showtimes };
+        window._drkBridge     = { showtimes: showtimes };
+        window._drkRenderDate = renderTimeChips; /* exposed for calendar callbacks */
 
-        /* ── Build unique date list ────────────────────── */
+        /* ── Build unique sorted date list ──────────────── */
         var uniqueDates = [];
         showtimes.forEach(function (s) {
           if (uniqueDates.indexOf(s.date) === -1) uniqueDates.push(s.date);
         });
 
-        dateScroller.innerHTML = uniqueDates.map(function (date, i) {
-          var d = new Date(date + 'T00:00:00');
-          return '<button class="date-chip' + (i === 0 ? ' active' : '') +
-            '" data-date="' + date + '"' +
-            ' data-year="' + d.getFullYear() + '"' +
-            ' data-full-date="' + DAY_NAMES[d.getDay()] + ', ' + d.getDate() + ' ' +
-              MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear() + '">' +
-            '<span class="dc-day">' + DAY_NAMES[d.getDay()] + '</span>' +
-            '<span class="dc-num">' + d.getDate() + '</span>' +
-            '<span class="dc-mon">' + MONTH_NAMES[d.getMonth()] + '</span>' +
-            '</button>';
-        }).join('');
+        if (calWrap && window._DrkCalendar) {
+          /* ── Calendar widget mode ─────────────────────── */
+          _showRunInfo(uniqueDates[0], uniqueDates[uniqueDates.length - 1]);
+          _syncDateHeader(uniqueDates[0]);
 
-        /* Sync header date display */
-        function syncHeaderDate(chip) {
-          var hd = document.getElementById('headerDate');
-          var sd = document.getElementById('summaryDate');
-          var fd = chip.dataset.fullDate || chip.dataset.date;
-          if (hd) hd.textContent = fd;
-          if (sd) sd.textContent = fd;
-        }
-
-        var firstChip = dateScroller.querySelector('.date-chip.active');
-        if (firstChip) syncHeaderDate(firstChip);
-
-        dateScroller.querySelectorAll('.date-chip').forEach(function (chip) {
-          chip.addEventListener('click', function () {
-            dateScroller.querySelectorAll('.date-chip').forEach(function (c) { c.classList.remove('active'); });
-            chip.classList.add('active');
-            syncHeaderDate(chip);
-            renderTimeChips(chip.dataset.date);
+          window._DrkCalendar.init(uniqueDates, uniqueDates[0], function (date) {
+            _syncDateHeader(date);
+            renderTimeChips(date);
           });
-        });
+          renderTimeChips(uniqueDates[0]);
 
-        renderTimeChips(uniqueDates[0]);
+        } else if (dateScroller) {
+          /* ── Legacy date-chip strip ─────────────────────── */
+          dateScroller.innerHTML = uniqueDates.map(function (date, i) {
+            var d = new Date(date + 'T00:00:00');
+            return '<button class="date-chip' + (i === 0 ? ' active' : '') +
+              '" data-date="' + date + '"' +
+              ' data-year="' + d.getFullYear() + '"' +
+              ' data-full-date="' + DAY_NAMES[d.getDay()] + ', ' + d.getDate() + ' ' +
+                MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear() + '">' +
+              '<span class="dc-day">' + DAY_NAMES[d.getDay()] + '</span>' +
+              '<span class="dc-num">' + d.getDate() + '</span>' +
+              '<span class="dc-mon">' + MONTH_NAMES[d.getMonth()] + '</span>' +
+              '</button>';
+          }).join('');
+
+          _syncDateHeader(uniqueDates[0]);
+
+          dateScroller.querySelectorAll('.date-chip').forEach(function (chip) {
+            chip.addEventListener('click', function () {
+              dateScroller.querySelectorAll('.date-chip').forEach(function (c) { c.classList.remove('active'); });
+              chip.classList.add('active');
+              _syncDateHeader(chip.dataset.fullDate || chip.dataset.date);
+              renderTimeChips(chip.dataset.date);
+            });
+          });
+          renderTimeChips(uniqueDates[0]);
+        }
       })
       .catch(function () {
-        /* API unavailable — let inline fallback generate date chips */
+        /* API unavailable — fallback calendar handles display */
       });
+  }
+
+  /* ── Sync the page header strip and summary panel date label ── */
+  function _syncDateHeader(dateOrFormatted) {
+    var MFULL = [
+      'January','February','March','April','May','June',
+      'July','August','September','October','November','December'
+    ];
+    var display;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateOrFormatted)) {
+      var d = new Date(dateOrFormatted + 'T00:00:00');
+      display = DAY_NAMES[d.getDay()] + ', ' + d.getDate() + ' ' +
+                MFULL[d.getMonth()] + ' ' + d.getFullYear();
+    } else {
+      display = dateOrFormatted;
+    }
+    var hd = document.getElementById('headerDate');
+    var sd = document.getElementById('summaryDate');
+    if (hd) hd.textContent = display;
+    if (sd) sd.textContent = display;
+  }
+
+  /* ── Show the movie run-info bar (gold pill) ── */
+  function _showRunInfo(startStr, endStr) {
+    var el = document.getElementById('calRunInfo');
+    if (!el) return;
+    var MFULL = [
+      'January','February','March','April','May','June',
+      'July','August','September','October','November','December'
+    ];
+    function fmt(s) {
+      var d = new Date(s + 'T00:00:00');
+      return d.getDate() + ' ' + MFULL[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    var endD  = new Date(endStr + 'T00:00:00');
+    var now   = new Date(); now.setHours(0, 0, 0, 0);
+    var diff  = Math.ceil((endD - now) / 86400000);
+    var rem   = diff > 0 ? diff + ' day' + (diff !== 1 ? 's' : '') + ' remaining' : 'Last day today';
+    el.innerHTML =
+      '<i class="fas fa-calendar-check"></i>&nbsp;' +
+      'Showing from <strong>' + fmt(startStr) + '</strong>' +
+      ' to <strong>' + fmt(endStr) + '</strong>' +
+      '&nbsp;&nbsp;·&nbsp;&nbsp;<strong>' + rem + '</strong>';
+    el.style.display = 'flex';
   }
 
   /* ── Build time chips for a given date ────────────────── */

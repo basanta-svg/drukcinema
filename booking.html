@@ -13,6 +13,7 @@
   <!-- Favicon -->
   <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/mobile.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -697,15 +698,241 @@
     .hall-chip.active i { color: var(--accent); }
     .hall-chip.active .hall-name { color: var(--accent); }
 
-    /* Responsive */
+    /* ══════════════════════════════════════════════════════════
+       CALENDAR WIDGET
+    ══════════════════════════════════════════════════════════ */
+    .booking-calendar-wrap {
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      user-select: none;
+    }
+    .cal-nav-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cal-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px; font-weight: 700; color: white;
+    }
+    .cal-nav-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text-sec); font-size: 12px;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .cal-nav-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+    .cal-days-header {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 6px 10px 0;
+    }
+    .cal-days-header span {
+      text-align: center; font-size: 9px; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.3px; padding: 4px 0;
+    }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 2px; padding: 4px 10px 10px;
+    }
+    .cal-cell {
+      height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      font-size: 12px; font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer; border: 1px solid transparent;
+      transition: all 0.18s; background: transparent;
+      color: var(--text-sec);
+    }
+    .cal-cell.cal-empty { pointer-events: none; visibility: hidden; }
+    .cal-cell.cal-off   { opacity: 0.25; cursor: not-allowed; color: var(--text-muted); }
+    .cal-cell.cal-avail { color: white; background: rgba(255,255,255,0.04); }
+    .cal-cell.cal-avail:hover {
+      background: rgba(229,9,20,0.18); border-color: rgba(229,9,20,0.45);
+      color: white; transform: scale(1.1);
+    }
+    .cal-cell.cal-sel {
+      background: var(--accent); color: white; font-weight: 800;
+      box-shadow: 0 0 14px rgba(229,9,20,0.4);
+      border-color: var(--accent); transform: scale(1.08);
+    }
+    /* Run-info bar */
+    .cal-run-info {
+      display: none; align-items: center; flex-wrap: wrap; gap: 5px;
+      margin-top: 10px; padding: 10px 14px;
+      background: rgba(245,197,24,0.07);
+      border: 1px solid rgba(245,197,24,0.2);
+      border-radius: 8px;
+      font-size: 12px; color: var(--text-sec); line-height: 1.6;
+    }
+    .cal-run-info i       { color: var(--gold); font-size: 11px; flex-shrink: 0; }
+    .cal-run-info strong  { color: var(--gold); }
+
+    /* ── Seat-map scroll hint (mobile only) ── */
+    .scroll-hint-mobile {
+      display: none;
+      text-align: center; font-size: 11px;
+      color: var(--text-muted); padding: 0 0 10px;
+      letter-spacing: 0.4px;
+    }
+    .scroll-hint-mobile i { font-size: 10px; margin: 0 2px; }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+
+    /* Tablet — single column layout */
     @media (max-width: 960px) {
       .booking-page-body { grid-template-columns: 1fr; }
       .summary-sticky { position: static; }
     }
-    @media (max-width: 600px) {
-      .seat { width: 24px; height: 22px; font-size: 7px; }
+
+    /* Tablet — compact header + pills */
+    @media (max-width: 768px) {
+      .movie-header-strip { padding: 72px 0 0; }
+      .movie-header-inner { padding: 14px 0 16px; gap: 14px; }
+      .movie-header-meta h1 { font-size: 1.15rem; }
+      .show-pills { gap: 6px; }
+      .show-pill { padding: 4px 10px; font-size: 11px; }
+      .seatmap-header { padding: 14px 18px; }
+      .seatmap-scroll { min-height: 380px; }
+      .sum-head { padding: 16px 18px; }
+      .sum-movie { padding: 16px 18px; }
+      .sum-seats { padding: 14px 18px; }
+      .cat-breakdown { padding: 12px 18px; }
+      .sum-pricing { padding: 14px 18px; }
+      .sum-action { padding: 16px 18px; }
+    }
+
+    /* Mobile — full overhaul */
+    @media (max-width: 480px) {
+      /* Movie header strip */
+      .movie-header-strip { padding: 66px 0 0; }
+      .movie-header-inner {
+        flex-direction: column; align-items: flex-start;
+        gap: 10px; padding: 12px 0 14px;
+      }
+      .movie-poster-thumb { width: 44px; height: 66px; border-radius: 6px; }
+      .movie-header-meta h1 { font-size: 1rem; margin-bottom: 6px; }
+      .show-pills { gap: 5px; }
+      .show-pill { font-size: 10px; padding: 3px 8px; border-radius: 14px; }
+
+      /* Progress bar — numbers only */
+      .progress-bar-wrap { padding: 10px 0; }
+      .pstep-lbl { display: none; }
+      .pstep { gap: 0; }
+      .pstep-num { width: 24px; height: 24px; font-size: 10px; }
+      .pconn { min-width: 36px; margin: 0 6px; }
+
+      /* Booking body — flex stack */
+      .booking-page-body {
+        display: flex; flex-direction: column;
+        padding: 14px 0 36px; gap: 14px;
+      }
+      .summary-sticky { width: 100%; margin-top: 1rem; }
+
+      /* Selector groups */
+      .selector-group { margin-bottom: 16px; }
+      .sel-label { font-size: 10px; letter-spacing: 1.5px; margin-bottom: 8px; }
+
+      /* Hall chips */
+      .hall-chip { padding: 10px 14px; gap: 10px; }
+      .hall-chip .hall-name { font-size: 12px; }
+      .hall-chip .hall-sub  { font-size: 10px; }
+
+      /* Date chips (legacy strip — still used as fallback) */
+      .date-chip { padding: 7px 10px; border-radius: 8px; }
+      .date-chip .dc-num { font-size: 17px !important; }
+      .date-chip .dc-day, .date-chip .dc-mon { font-size: 9px; }
+
+      /* Showtime selector — 2-column grid */
+      .time-scroller {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        overflow-x: visible;
+      }
+      .time-chip {
+        flex-shrink: unset; width: 100%;
+        min-height: 44px; justify-content: center;
+        font-size: 13px; padding: 8px 12px;
+      }
+
+      /* Scroll hint */
+      .scroll-hint-mobile { display: block; }
+
+      /* Seat map card */
+      .seatmap-card { border-radius: 12px; }
+      .seatmap-header { padding: 12px 14px; }
+      .seatmap-title { font-size: 13px; }
+      .seat-count-badge { font-size: 11px; padding: 3px 10px; }
+      .seatmap-scroll { padding: 12px 10px 14px; min-height: unset; }
+      .seatmap-inner { min-width: 460px; }
+
+      /* Seats — 28×28 per task spec */
+      .seat { width: 28px; height: 28px; font-size: 0.6rem; border-radius: 4px 4px 3px 3px; }
+      .seat::before { top: -3px; left: 3px; right: 3px; height: 3px; }
+      .s-row { gap: 5px; margin-bottom: 6px; }
+      .s-row-lbl { width: 18px; font-size: 10px; }
+      .s-seats { gap: 4px; }
+      .s-aisle { width: 12px; }
+      .snh-num { width: 28px; }
+
+      /* Screen graphic */
+      .screen-viz { height: 44px; width: 88%; }
+      .screen-zone { margin-bottom: 28px; }
+      .screen-label-text { font-size: 9px; letter-spacing: 4px; margin-top: 10px; }
+
+      /* Legend */
+      .legend-strip { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+      .leg-item { font-size: 11px; gap: 5px; }
+      .leg-swatch { width: 22px; height: 18px; border-radius: 3px 3px 2px 2px; }
+
+      /* Summary card */
+      .sum-card { border-radius: 12px; }
+      .sum-head { padding: 14px 16px; }
+      .sum-head h3 { font-size: 14px; }
+      .sum-movie { padding: 14px 16px; gap: 10px; }
+      .sum-movie img { width: 44px; height: 66px; }
+      .sum-movie-info h4 { font-size: 12px; margin-bottom: 6px; }
+      .sum-movie-info p { font-size: 10px; }
+      .sum-seats { padding: 12px 16px; }
+      .sum-seats-lbl { font-size: 9px; letter-spacing: 1px; }
+      .s-tag { font-size: 10px; padding: 2px 8px; }
+      .cat-breakdown { padding: 10px 16px; }
+      .cat-brkdwn-lbl { font-size: 9px; }
+      .brkdwn-row { font-size: 11px; }
+      .sum-pricing { padding: 12px 16px; }
+      .sum-row { font-size: 11px; margin-bottom: 6px; }
+      .sum-row.total-row .lbl { font-size: 13px; }
+      .sum-row.total-row .val { font-size: 18px; }
+      .sum-action { padding: 14px 16px; }
+      /* Confirm button — full width, 48px min-height */
+      .book-btn { width: 100%; min-height: 48px; font-size: 14px; padding: 13px; border-radius: 8px; }
+      .book-note { font-size: 10px; }
+      .max-warn { font-size: 11px; padding: 8px 12px; }
+      .cancel-note { font-size: 10px; padding: 10px 12px; margin-top: 8px; }
+
+      /* Calendar: further compact on small screens */
+      .cal-nav-row { padding: 8px 10px; }
+      .cal-title { font-size: 12px; }
+      .cal-nav-btn { width: 26px; height: 26px; font-size: 10px; }
+      .cal-grid { padding: 3px 8px 8px; gap: 1px; }
+      .cal-cell { height: 26px; font-size: 11px; border-radius: 4px; }
+      .cal-days-header { padding: 4px 8px 0; }
+      .cal-days-header span { font-size: 8px; padding: 3px 0; }
+    }
+
+    /* Extra small — 360px and below */
+    @media (max-width: 360px) {
+      .seatmap-inner { min-width: 380px; }
+      .seat { width: 24px; height: 24px; font-size: 0.55rem; }
       .s-seats { gap: 3px; }
-      .s-aisle { width: 14px; }
+      .s-aisle { width: 8px; }
     }
 
     /* ── Print styles for e-ticket ─────────────────────────────── */
@@ -884,11 +1111,11 @@
       <!-- ══ LEFT: Seat selection ════════════════════════ -->
       <div class="seat-col">
 
-        <!-- Date selection -->
+        <!-- Date selection — inline calendar -->
         <div class="selector-group">
           <p class="sel-label"><i class="fas fa-calendar-days"></i> Select Date</p>
-          <!-- Date chips are generated dynamically by the inline script below -->
-          <div class="date-scroller" id="dateScroller"></div>
+          <div id="bookingCalendarWrap" class="booking-calendar-wrap"></div>
+          <div class="cal-run-info" id="calRunInfo"></div>
         </div>
 
         <!-- Hall selection -->
@@ -956,6 +1183,9 @@
 
           <!-- Scrollable map area -->
           <div class="seatmap-scroll">
+            <p class="scroll-hint-mobile">
+              <i class="fas fa-left-right"></i> Scroll left / right to see all seats
+            </p>
             <div class="seatmap-inner">
 
               <!-- SCREEN -->
@@ -1298,78 +1528,145 @@
 </script>
 
 <!-- ════════════════════════════════════════════════════════
-     DYNAMIC DATE CHIPS
-     Runs after main.js + admin-bridge.js.
-     • If admin-bridge already populated #dateScroller (admin movie) → skips.
-     • Otherwise generates 7 date chips starting from today.
+     CALENDAR WIDGET
+     Defined before admin-bridge.js's DOMContentLoaded handler
+     runs so it is available when bridgeBookingPage() fires.
 ═════════════════════════════════════════════════════════ -->
 <script>
-(function generateDynamicDateChips() {
+window._DrkCalendar = (function () {
   'use strict';
 
-  var ds = document.getElementById('dateScroller');
-  if (!ds) return;
-  /* Admin-bridge already built the chips for this admin movie — bail out */
-  if (ds.children.length > 0) return;
+  var _dates    = [];
+  var _selected = null;
+  var _year, _month;
+  var _onSelect;
 
-  var DAY   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var MON   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MONTHS = [
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+  ];
+  var WDAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function isoToday() { return new Date().toISOString().split('T')[0]; }
+
+  function render() {
+    var wrap = document.getElementById('bookingCalendarWrap');
+    if (!wrap) return;
+
+    var today     = isoToday();
+    var firstDay  = new Date(_year, _month, 1);
+    var daysInMon = new Date(_year, _month + 1, 0).getDate();
+    /* Mon = 0 … Sun = 6 */
+    var startDow  = (firstDay.getDay() + 6) % 7;
+
+    var cells = '';
+    for (var i = 0; i < startDow; i++) {
+      cells += '<div class="cal-cell cal-empty"></div>';
+    }
+    for (var d = 1; d <= daysInMon; d++) {
+      var ds    = _year + '-' + pad(_month + 1) + '-' + pad(d);
+      var avail = _dates.indexOf(ds) !== -1;
+      var past  = ds < today;
+      var sel   = ds === _selected;
+      var cls   = 'cal-cell ' + (sel ? 'cal-sel' : (avail && !past) ? 'cal-avail' : 'cal-off');
+      var dis   = (past || !avail) ? ' disabled' : '';
+      cells += '<button class="' + cls + '"' + dis + ' data-date="' + ds + '">' + d + '</button>';
+    }
+
+    wrap.innerHTML =
+      '<div class="cal-nav-row">' +
+        '<button class="cal-nav-btn" id="calPrevBtn"><i class="fas fa-chevron-left"></i></button>' +
+        '<span class="cal-title">' + MONTHS[_month] + ' ' + _year + '</span>' +
+        '<button class="cal-nav-btn" id="calNextBtn"><i class="fas fa-chevron-right"></i></button>' +
+      '</div>' +
+      '<div class="cal-days-header">' +
+        WDAYS.map(function (w) { return '<span>' + w + '</span>'; }).join('') +
+      '</div>' +
+      '<div class="cal-grid">' + cells + '</div>';
+
+    wrap.querySelector('#calPrevBtn').addEventListener('click', function () { _shift(-1); });
+    wrap.querySelector('#calNextBtn').addEventListener('click', function () { _shift(1); });
+
+    wrap.querySelectorAll('.cal-avail, .cal-sel').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        _selected = btn.dataset.date;
+        if (_onSelect) _onSelect(_selected);
+        render();
+      });
+    });
+  }
+
+  function _shift(dir) {
+    _month += dir;
+    if (_month > 11) { _month = 0; _year++; }
+    if (_month < 0)  { _month = 11; _year--; }
+    render();
+  }
+
+  return {
+    init: function (dates, firstDate, onSelect) {
+      _dates    = dates || [];
+      _onSelect = onSelect;
+      var seed  = firstDate ? new Date(firstDate + 'T00:00:00') : new Date();
+      _year     = seed.getFullYear();
+      _month    = seed.getMonth();
+      _selected = firstDate || null;
+      render();
+    }
+  };
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     FALLBACK CALENDAR
+     Runs after main.js + admin-bridge.js.
+     • If admin-bridge already initialised the calendar → skips.
+     • Otherwise renders a 14-day calendar starting from today
+       so the page is usable without a movieId / live API.
+═════════════════════════════════════════════════════════ -->
+<script>
+(function fallbackCalendar() {
+  'use strict';
+
+  /* If admin-bridge already initialised the calendar, do nothing */
+  if (window._drkBridge) return;
+
+  var wrap = document.getElementById('bookingCalendarWrap');
+  if (!wrap || wrap.innerHTML.trim() !== '') return;
+
   var MFULL = [
     'January','February','March','April','May','June',
     'July','August','September','October','November','December'
   ];
+  var DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  /* Midnight today (local time) */
+  /* Build 14 available dates starting today */
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  /* Build 7 date chips: today + 6 days */
-  for (var i = 0; i < 7; i++) {
-    var d   = new Date(today.getTime());
+  var dates = [];
+  for (var i = 0; i < 14; i++) {
+    var d = new Date(today.getTime());
     d.setDate(today.getDate() + i);
-
-    var dayName  = DAY[d.getDay()];
-    var dateNum  = d.getDate();
-    var monShort = MON[d.getMonth()];
-    var yr       = d.getFullYear();
-    /* Full readable date — e.g. "Sun, 25 May 2026" */
-    var fullDate = dayName + ', ' + dateNum + ' ' + MFULL[d.getMonth()] + ' ' + yr;
-    /* ISO date string for data attributes */
-    var isoDate  = d.toISOString().split('T')[0];
-
-    var btn = document.createElement('button');
-    btn.className        = 'date-chip' + (i === 0 ? ' active' : '');
-    btn.dataset.date     = isoDate;
-    btn.dataset.year     = String(yr);
-    btn.dataset.fullDate = fullDate;
-    btn.innerHTML =
-      '<span class="dc-day">' + dayName  + '</span>' +
-      '<span class="dc-num">' + dateNum  + '</span>' +
-      '<span class="dc-mon">' + monShort + '</span>';
-    ds.appendChild(btn);
+    dates.push(d.toISOString().split('T')[0]);
   }
 
-  /* ── Helper: sync header strip + summary panel ─────────── */
-  function syncDateDisplay(chip) {
+  /* Sync header + summary with a date string */
+  function syncDisplay(iso) {
+    var d  = new Date(iso + 'T00:00:00');
+    var fd = DAY[d.getDay()] + ', ' + d.getDate() + ' ' + MFULL[d.getMonth()] + ' ' + d.getFullYear();
     var hd = document.getElementById('headerDate');
-    if (hd) hd.textContent = chip.dataset.fullDate;
-
     var sd = document.getElementById('summaryDate');
-    if (sd) sd.textContent = chip.dataset.fullDate;
+    if (hd) hd.textContent = fd;
+    if (sd) sd.textContent = fd;
   }
 
-  /* Set initial display from the first (active) chip */
-  var firstChip = ds.querySelector('.date-chip.active');
-  if (firstChip) syncDateDisplay(firstChip);
-
-  /* ── Click handler (bubbles up to scroller container) ─── */
-  /* main.js also listens via event delegation and resets the seat map;
-     this listener only needs to update the date labels. */
-  ds.addEventListener('click', function (e) {
-    var chip = e.target.closest('.date-chip');
-    if (!chip) return;
-    syncDateDisplay(chip);
-  });
+  if (window._DrkCalendar) {
+    window._DrkCalendar.init(dates, dates[0], function (date) {
+      syncDisplay(date);
+    });
+    syncDisplay(dates[0]);
+  }
 })();
 </script>
 </body>

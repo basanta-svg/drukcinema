@@ -1,0 +1,305 @@
+/* ================================================================
+   DrukCinema — Mobile Responsiveness Supplement
+   Breakpoints: Mobile ≤480px | Tablet ≤768px | Desktop 769px+
+   Adds targeted fixes not covered in main.css
+================================================================ */
+
+/* ── Touch-friendliness: all primary interactive elements ≥44px ── */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-gold,
+.nav-login-btn,
+.nav-register-btn,
+.nav-icon-btn,
+.hamburger,
+.social-btn,
+.filter-btn,
+.cinema-view-btn,
+.auth-tab,
+.auth-btn,
+.cta-btn,
+.newsletter-submit,
+.book-btn,
+.confirm-btn,
+.hall-chip,
+.showtime-tab,
+.date-chip,
+.time-chip,
+.nav-profile-btn {
+  min-height: 44px;
+}
+
+/* ── Movies grid — explicit 4 / 2 / 1 columns ── */
+.movies-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+  .movies-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .movies-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* Movie card fills grid cell width */
+.movies-grid .movie-card {
+  width: 100%;
+}
+
+/* ── Hero section ── */
+@media (max-width: 768px) {
+  .hero {
+    height: 72vh;
+    min-height: 500px;
+    max-height: 700px;
+  }
+  .hero-title {
+    font-size: clamp(1.3rem, 4.5vw, 2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    height: 68vh;
+    min-height: 460px;
+    max-height: 600px;
+  }
+  .hero-title {
+    font-size: clamp(1.2rem, 4vw, 1.7rem);
+  }
+  .hero-content {
+    padding-bottom: 56px;
+  }
+  .hero-price {
+    font-size: 12px;
+  }
+}
+
+/* ── CTA banner: stack + full-width button on mobile ── */
+@media (max-width: 768px) {
+  .cta-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 28px 24px;
+  }
+  .cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Cinema grid: single column at 480px ── */
+@media (max-width: 480px) {
+  .cinemas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Promo banner: stack actions + single-column stats at 480px ── */
+@media (max-width: 480px) {
+  .promo-content {
+    padding: 0 20px;
+  }
+  .promo-content h2 {
+    font-size: 1.3rem;
+  }
+  .promo-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .promo-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .promo-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Footer: center-align text on smallest screens ── */
+@media (max-width: 480px) {
+  .footer-main {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .footer-socials {
+    justify-content: center;
+  }
+  .footer-desc {
+    max-width: 100%;
+  }
+  .footer-col {
+    text-align: center;
+  }
+  .footer-col ul {
+    align-items: center;
+  }
+}
+
+/* ── Newsletter: ensure input fills available width ── */
+@media (max-width: 768px) {
+  .newsletter-form {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .newsletter-input {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+}
+
+/* ── Movie cards: visible Book Now on touch devices ── */
+@media (hover: none) {
+  /* Tap to reveal overlay on touch screens */
+  .movie-card:active .movie-overlay,
+  .movie-card:focus-within .movie-overlay {
+    opacity: 1;
+  }
+}
+
+/* ── Booking page: seat map improvements ── */
+.seatmap-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}
+
+@media (max-width: 480px) {
+  .seatmap-inner {
+    min-width: 400px;
+  }
+  .seat {
+    width: 20px;
+    height: 18px;
+    font-size: 6px;
+  }
+  .s-seats {
+    gap: 2px;
+  }
+  .s-aisle {
+    width: 8px;
+  }
+  .legend-strip {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+  }
+  .leg-item {
+    font-size: 11px;
+  }
+  .leg-swatch {
+    width: 20px;
+    height: 17px;
+  }
+  .booking-page-body {
+    padding: 16px 0 40px;
+    gap: 16px;
+  }
+  .pconn {
+    min-width: 14px;
+    margin: 0 4px;
+  }
+  .pstep-lbl {
+    font-size: 11px;
+  }
+}
+
+/* ── Forms: ensure all inputs full-width on mobile ── */
+@media (max-width: 480px) {
+  .form-input,
+  .form-control,
+  .newsletter-input,
+  .search-input,
+  .sort-select {
+    width: 100%;
+  }
+  .name-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+/* ── Movies page toolbar: stack on mobile ── */
+@media (max-width: 480px) {
+  .movies-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .search-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+  .sort-select {
+    width: 100%;
+  }
+  .category-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cat-tab {
+    flex-shrink: 0;
+  }
+}
+
+/* ── Page header: scale down on mobile ── */
+@media (max-width: 480px) {
+  .page-header {
+    padding: 88px 0 24px;
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Profile page extra improvements ── */
+@media (max-width: 480px) {
+  .info-row {
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 0;
+  }
+  .info-label {
+    width: auto;
+    font-size: 10px;
+  }
+  .info-value {
+    font-size: 13px;
+  }
+}
+
+/* ── Offers page ── */
+@media (max-width: 480px) {
+  .offers-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Very small screens (iPhone SE, 320px) ── */
+@media (max-width: 360px) {
+  .container {
+    padding: 0 14px;
+  }
+  .hero-title {
+    font-size: 1.3rem;
+  }
+  .hero-actions .btn {
+    font-size: 13px;
+    padding: 11px 16px;
+  }
+  .navbar-logo {
+    font-size: 18px;
+  }
+}

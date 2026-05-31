@@ -13,6 +13,7 @@
   <!-- Favicon -->
   <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/mobile.css">
 
   <style>
     /* Extra: form input within profile (re-use signin vars through CSS vars in main.css) */
@@ -200,6 +201,31 @@
     .cm-btn-danger:hover { background: #b91c1c; box-shadow: 0 6px 20px rgba(220,38,38,0.4); }
     .cm-btn-ghost { background: #252525; color: var(--text-sec); border: 1px solid var(--border); }
     .cm-btn-ghost:hover { color: white; }
+
+    /* ── Mobile responsiveness ── */
+    @media (max-width: 768px) {
+      .profile-stats { gap: 10px; }
+      .edit-actions { gap: 8px; }
+    }
+    @media (max-width: 480px) {
+      .profile-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .stat-item { padding: 12px 8px; }
+      .stat-item .sv { font-size: 1.2rem; }
+      .stat-item .sl { font-size: 10px; }
+      .edit-actions { flex-direction: column; gap: 8px; }
+      .btn-save   { width: 100%; justify-content: center; padding: 12px; }
+      .btn-cancel { width: 100%; justify-content: center; padding: 12px; }
+      .phone-group-form { flex-wrap: nowrap; }
+      .cc-select { min-width: 88px; padding-right: 20px; }
+      .cancel-modal-box { padding: 24px 18px; }
+      .cancel-modal-actions { flex-direction: column; }
+      .cm-btn { width: 100%; }
+      .bh-cancel-btn { min-height: 36px; }
+    }
+    @media (max-width: 360px) {
+      .profile-stats { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+      .stat-item .sv { font-size: 1.1rem; }
+    }
   </style>
 </head>
 <body>
